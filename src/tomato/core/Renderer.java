@@ -58,7 +58,7 @@ public class Renderer extends JPanel {
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
+                if (GameState.isPaused()) {
                     int mx = scaleX(e.getX());
                     int my = scaleY(e.getY());
                     currentMenu.handleHover(mx, my);
@@ -94,7 +94,6 @@ public class Renderer extends JPanel {
                 World.WORLD.update();
                 break;
             case PAUSED:
-                // TODO: make the main menu both clickable and navigatable with keyboard
                 break;
         }
         // menus/paused logic later

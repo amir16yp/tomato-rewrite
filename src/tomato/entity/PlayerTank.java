@@ -1,6 +1,7 @@
 package tomato.entity;
 
 import tomato.Game;
+import tomato.core.GameState;
 import tomato.core.World;
 
 import java.awt.event.KeyEvent;
@@ -28,10 +29,14 @@ public class PlayerTank extends Tank {
             shoot();
         });
 
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
+            GameState.Pause();
+        });
+
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_X, () -> {
             // debug key
 //            World.WORLD.spawnRedEnemy(120, 120);
-            World.WORLD.spawnLandmine(120, 120);
+            World.WORLD.spawnRedEnemy(120, 120);
         });
 
     }

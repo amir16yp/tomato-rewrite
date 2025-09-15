@@ -11,7 +11,7 @@ public class VFXManager {
         this.effects = new CopyOnWriteArrayList<>();
         this.lighting = new Lighting();
         // Set default lighting to a slightly darker environment for better effect visibility
-        this.lighting.setDaylight(0.2f);
+        this.lighting.setDaylight(1f);
     }
 
     public void addEffect(VisualEffect effect) {
