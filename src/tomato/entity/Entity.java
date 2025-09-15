@@ -117,6 +117,63 @@ public class Entity {
             return new Rectangle((int) x, (int) y, 0, 0);
         }
 
+        // Use cached hitbox if available and sprite hasn't changed
+        if (cachedHitbox != null && !hitboxNeedsUpdate) {
+            // Return hitbox with current position + cached relative offset
+            return new Rectangle(
+                (int) x + cachedHitbox.x,
+                (int) y + cachedHitbox.y,
+                cachedHitbox.width,
+                cachedHitbox.height
+            );
+        }
+
+        // Try to get pre-calculated hitbox from SpriteCache first
+        Rectangle spriteHitbox = null;
+        if (entityType != null && currentDirection != null) {
+            Rectangle preCalculated = tomato.core.SpriteCache.queryHitboxCache(entityType, currentDirection);
+            if (preCalculated != null) {
+                spriteHitbox = new Rectangle(
+                    (int) x + preCalculated.x,
+                    (int) y + preCalculated.y,
+                    preCalculated.width,
+                    preCalculated.height
+                );
+                
+                // Cache the relative offset for future use
+                cachedHitbox = new Rectangle(
+                    preCalculated.x,  // Store relative offset
+                    preCalculated.y,  // Store relative offset
+                    preCalculated.width,
+                    preCalculated.height
+                );
+            }
+        }
+        
+        // Fallback to expensive pixel-by-pixel calculation if no pre-calculated hitbox
+        if (spriteHitbox == null) {
+            spriteHitbox = calculateSpriteHitbox();
+            
+            // Cache the relative hitbox dimensions
+            if (spriteHitbox.width > 0 && spriteHitbox.height > 0) {
+                cachedHitbox = new Rectangle(
+                    spriteHitbox.x - (int) x,  // Store relative offset
+                    spriteHitbox.y - (int) y,  // Store relative offset
+                    spriteHitbox.width,
+                    spriteHitbox.height
+                );
+            }
+        }
+        
+        hitboxNeedsUpdate = false;
+        return spriteHitbox;
+    }
+
+    private Rectangle calculateSpriteHitbox() {
+        if (currentSprite == null) {
+            return new Rectangle((int) x, (int) y, 0, 0);
+        }
+
         int width = currentSprite.getWidth();
         int height = currentSprite.getHeight();
 
@@ -210,18 +267,10 @@ public class Entity {
     }
 
     /**
-     * Get entities that intersect with this entity - optimized for projectiles
+     * Get entities that intersect with this entity - optimized using spatial grid
      */
     public ArrayList<Entity> getEntitiesIntersect() {
-        ArrayList<Entity> entitiesIntersected = new ArrayList<>();
-        Rectangle hitbox = this.getHitbox();
-
-        for (Entity entity : World.WORLD.getWorldEntities()) {
-            if (entity != this && entity.getHitbox().intersects(hitbox)) {
-                entitiesIntersected.add(entity);
-            }
-        }
-        return entitiesIntersected;
+        return new ArrayList<>(World.WORLD.getSpatialGrid().getActualCollisions(this));
     }
 
     public void handleCollisions() {
@@ -233,38 +282,22 @@ public class Entity {
 
 
     /**
-     * Fast collision check - returns first entity hit (optimized for projectiles)
+     * Fast collision check - returns first entity hit (optimized using spatial grid)
      */
     public Entity getFirstEntityHit() {
-        Rectangle hitbox = this.getHitbox();
-
-        for (Entity entity : World.WORLD.getWorldEntities()) {
-            if (entity != this && entity.getHitbox().intersects(hitbox)) {
-                return entity;
-            }
-        }
-        return null;
+        return World.WORLD.getSpatialGrid().getFirstCollision(this);
     }
 
 
     /**
      * Check if this entity intersects with any non-projectile entity
-     * Used for collision prevention in movement
+     * Used for collision prevention in movement - optimized using spatial grid
      */
     public boolean hasCollisionWithNonProjectiles() {
-        Rectangle hitbox = this.getHitbox();
-        for (Entity entity : World.WORLD.getWorldEntities()) {
-            if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox)) {
-                return true;
-            }
-        }
-
-        // Also check collision with player entity if this is not the player
-        if (this != World.PLAYER_ENTITY && !(World.PLAYER_ENTITY instanceof Projectile)) {
-            return World.PLAYER_ENTITY.getHitbox().intersects(hitbox);
-        }
-
-        return false;
+        return World.WORLD.getSpatialGrid().hasCollisionWithNonProjectiles(this) ||
+               (this != World.PLAYER_ENTITY && 
+                !(World.PLAYER_ENTITY instanceof Projectile) && 
+                this.getHitbox().intersects(World.PLAYER_ENTITY.getHitbox()));
     }
 
     public double getX() {
@@ -277,18 +310,18 @@ public class Entity {
 
     public void setX(double x) {
         this.x = x;
-        hitboxNeedsUpdate = true;
+        // Position changes don't require hitbox recalculation, just offset update
     }
 
     public void setY(double y) {
         this.y = y;
-        hitboxNeedsUpdate = true;
+        // Position changes don't require hitbox recalculation, just offset update
     }
 
     public void setPosition(double x, double y) {
         this.x = x;
         this.y = y;
-        hitboxNeedsUpdate = true;
+        // Position changes don't require hitbox recalculation, just offset update
     }
 
     protected void logInfo() {

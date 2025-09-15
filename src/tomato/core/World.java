@@ -14,9 +14,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class World {
 
     private final CopyOnWriteArrayList<Entity> worldEntities = new CopyOnWriteArrayList<>();
+    private final SpatialGrid spatialGrid;
 
     public CopyOnWriteArrayList<Entity> getWorldEntities() {
         return worldEntities;
+    }
+    
+    public SpatialGrid getSpatialGrid() {
+        return spatialGrid;
     }
 
     private final int cellSize;
@@ -51,6 +56,8 @@ public class World {
         this.random = new Random(seed);
         this.noise = new OpenSimplexNoise(random);
         this.vfxManager = new VFXManager();
+        // Initialize spatial grid with cell size of 64 pixels for efficient collision detection
+        this.spatialGrid = new SpatialGrid(64);
     }
 
     public Chunk getChunkAtWorld(double worldX, double worldY) {
@@ -61,6 +68,22 @@ public class World {
     }
 
     public void update() {
+        // Clear and rebuild spatial grid for this frame
+        spatialGrid.clear();
+        
+        // Add player to spatial grid
+        if (PLAYER_ENTITY != null && isEntityInLoadedChunk(PLAYER_ENTITY)) {
+            spatialGrid.addEntity(PLAYER_ENTITY);
+        }
+        
+        // Add all loaded entities to spatial grid
+        for (Entity entity : worldEntities) {
+            if (isEntityInLoadedChunk(entity)) {
+                spatialGrid.addEntity(entity);
+            }
+        }
+        
+        // Update player
         PLAYER_ENTITY.update();
 
         // only update entities in loaded chunks

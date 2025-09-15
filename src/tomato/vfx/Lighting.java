@@ -4,6 +4,7 @@ import tomato.Game;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Lighting {
@@ -12,9 +13,13 @@ public class Lighting {
     private float maxDarkness = 0.9f; // Maximum darkness level
     private final CopyOnWriteArrayList<DynamicLightSource> lightSources;
     private BufferedImage lightMap;
+    
+    // Cache for pre-rendered light textures to avoid creating gradients every frame
+    private final ConcurrentHashMap<String, BufferedImage> lightTextureCache;
 
     public Lighting() {
         this.lightSources = new CopyOnWriteArrayList<>();
+        this.lightTextureCache = new ConcurrentHashMap<>();
     }
 
     public void setDaylight(float daylight) {
@@ -99,16 +104,51 @@ public class Lighting {
         if (screenX + radius >= 0 && screenX - radius < cameraView.width &&
             screenY + radius >= 0 && screenY - radius < cameraView.height) {
             
-            RadialGradientPaint paint = new RadialGradientPaint(
-                    screenX, screenY, radius,
-                    new float[]{0, 1},
-                    new Color[]{new Color(1f, 1f, 1f, strength), new Color(1f, 1f, 1f, 0)}
-            );
+            // Get cached light texture or create new one
+            BufferedImage lightTexture = getCachedLightTexture(radius, strength);
 
-            g.setPaint(paint);
             g.setComposite(AlphaComposite.DstOut);
-            g.fillOval(screenX - radius, screenY - radius, radius * 2, radius * 2);
+            g.drawImage(lightTexture, screenX - radius, screenY - radius, null);
         }
+    }
+
+    /**
+     * Get a cached light texture or create a new one if not cached.
+     * Pre-renders light textures to avoid creating gradients every frame.
+     */
+    private BufferedImage getCachedLightTexture(int radius, float strength) {
+        // Create cache key based on radius and strength
+        String cacheKey = String.format("r%d_s%.2f", radius, strength);
+        
+        return lightTextureCache.computeIfAbsent(cacheKey, key -> {
+            // Create pre-rendered light texture
+            int size = radius * 2;
+            BufferedImage texture = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = texture.createGraphics();
+            
+            // Enable antialiasing for smoother gradients
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            // Create radial gradient centered in the texture
+            RadialGradientPaint paint = new RadialGradientPaint(
+                radius, radius, radius,
+                new float[]{0, 1},
+                new Color[]{new Color(1f, 1f, 1f, strength), new Color(1f, 1f, 1f, 0)}
+            );
+            
+            g.setPaint(paint);
+            g.fillOval(0, 0, size, size);
+            g.dispose();
+            
+            return texture;
+        });
+    }
+
+    /**
+     * Clear the light texture cache to prevent memory leaks
+     */
+    public void clearLightTextureCache() {
+        lightTextureCache.clear();
     }
 
 }
