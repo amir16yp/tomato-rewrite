@@ -1,9 +1,12 @@
 package tomato.core;
 
 import tomato.Game;
-
+import tomato.ui.MainMenu;
+import tomato.ui.Menu;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.VolatileImage;
 
@@ -12,6 +15,16 @@ public class Renderer extends JPanel {
     private VolatileImage backBuffer;
     private final HUD hud;
     private final Camera camera;
+    private static final MainMenu mainMenu = new MainMenu();
+    private final Menu currentMenu = mainMenu;
+
+    private int scaleX(int screenX) {
+        return screenX * Game.WIDTH / getWidth();
+    }
+
+    private int scaleY(int screenY) {
+        return screenY * Game.HEIGHT / getHeight();
+    }
 
     public Renderer() {
         setDoubleBuffered(false);
@@ -20,8 +33,38 @@ public class Renderer extends JPanel {
         requestFocus();
         hud = new HUD();
         camera = new Camera();
-        setPreferredSize(new Dimension(Game.WIDTH, Game.HEIGHT));
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
+                    int mx = scaleX(e.getX());
+                    int my = scaleY(e.getY());
+                    currentMenu.handleClick(
+                            new MouseEvent(e.getComponent(), e.getID(),
+                                    e.getWhen(), e.getModifiersEx(),
+                                    mx, my, e.getClickCount(),
+                                    e.isPopupTrigger(), e.getButton())
+                    );
+                    repaint();
+                }
+            }
+        });
 
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
+                    int mx = scaleX(e.getX());
+                    int my = scaleY(e.getY());
+                    currentMenu.handleHover(mx, my);
+                    repaint();
+                }
+            }
+        });
+
+
+
+        setPreferredSize(new Dimension(Game.WIDTH, Game.HEIGHT));
         createBackBuffer();
     }
 
@@ -36,12 +79,18 @@ public class Renderer extends JPanel {
     }
 
     /**
-     * Logic update only – no drawing.
+         * Logic update only – no drawing.
      */
     public void update() {
-        if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
-            camera.update();
-            World.WORLD.update();
+        switch (GameState.CURRENT_STATE)
+        {
+            case PLAY:
+                camera.update();
+                World.WORLD.update();
+                break;
+            case PAUSED:
+                // TODO: make the main menu both clickable and navigatable with keyboard
+                break;
         }
         // menus/paused logic later
     }
@@ -77,19 +126,29 @@ public class Renderer extends JPanel {
                 g2.setColor(Color.BLACK);
                 g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
 
-                if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
-                    AffineTransform original = g2.getTransform();
-                    camera.applyTransform(g2, Game.WIDTH, Game.HEIGHT);
+                switch (GameState.CURRENT_STATE)
+                {
+                    case PLAY:
+                        AffineTransform original = g2.getTransform();
+                        camera.applyTransform(g2, Game.WIDTH, Game.HEIGHT);
 
-                    World.WORLD.render(g2, camera.getViewBounds(Game.WIDTH, Game.HEIGHT));
+                        World.WORLD.render(g2, camera.getViewBounds(Game.WIDTH, Game.HEIGHT));
 
-                    camera.resetTransform(g2, original);
-                } else {
-                    // paused/menu background
-                    g2.setColor(Color.DARK_GRAY);
-                    g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
+                        camera.resetTransform(g2, original);
+                        hud.render(g2);
+                        break;
+                    case PAUSED:
+                        currentMenu.render(g2);
+                        break;
+                    default:
+                        String msg = "IMPLEMENT YER GAME STATE!!!";
+                        // paused/menu background
+                        g2.setColor(Color.WHITE);
+                        g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
+                        g2.setColor(Color.BLACK);
+                        g2.drawString(msg, (Game.WIDTH /2)- g2.getFontMetrics().stringWidth(msg), Game.HEIGHT /2);
+                        break;
                 }
-                hud.render(g2);
             } finally {
                 g2.dispose();
             }

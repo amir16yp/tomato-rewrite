@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class HUD {
     private static final BufferedImage HEART_SPRITE = Utils.loadQOI("/tomato/assets/heart.qoi");
-    private static final Font MONO_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 10);
+    public static final Font MONO_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 10);
 
     // TODO add a static field of a monospaced font instance
 
