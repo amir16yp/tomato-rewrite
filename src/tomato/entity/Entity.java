@@ -23,6 +23,11 @@ public class Entity
     protected int spriteHeight = 0;
     protected int health = 20;
 
+    // TODO: enemy tanks should not exit their spawn chunks
+    // TODO: projectiles should be marked for removal after it traveled through an entire chunk without hitting anything
+    // TODO: use GameState to show different screens (death screen, pause)
+    // TODO: add different enemy types and sprite variants (damage, etc)
+
     public void takeDamage(int damage) {
         this.health -= damage;
         if (this.health <= 0) {
