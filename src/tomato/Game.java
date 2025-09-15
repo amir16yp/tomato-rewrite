@@ -21,16 +21,16 @@ public class Game extends JFrame {
     public static final GameLoop GAME_LOOP = new GameLoop();
     public static Game GAME;
 
-    static {
-        // Optimal Java2D settings for Linux performance
-        // Disable OpenGL and XRender pipelines, use software rendering
-        // This works best on Linux, especially on Wayland
-        System.setProperty("sun.java2d.opengl", "false");
-        System.setProperty("sun.java2d.xrender", "false");
-
-        // Windows-specific settings (ignored on Linux)
-        System.setProperty("sun.java2d.d3d", "True");
-    }
+//    static {
+//        // Optimal Java2D settings for Linux performance
+//        // Disable OpenGL and XRender pipelines, use software rendering
+//        // This works best on Linux, especially on Wayland
+//        System.setProperty("sun.java2d.opengl", "false");
+//        System.setProperty("sun.java2d.xrender", "false");
+//
+//        // Windows-specific settings (ignored on Linux)
+//        System.setProperty("sun.java2d.d3d", "True");
+//    }
 
     public Game()
     {

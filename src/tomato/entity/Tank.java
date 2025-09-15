@@ -10,4 +10,13 @@ public class Tank extends Entity{
         this.currentSprite = Utils.loadQOI("/tomato/assets/tank.qoi");
     }
 
+    protected void moveForward(double distance) {
+        switch (currentDirection) {
+            case NORTH: setY(this.y - distance); break;
+            case SOUTH: setY(this.y + distance); break;
+            case EAST:  setX(this.x + distance); break;
+            case WEST:  setX(this.x - distance); break;
+        }
+    }
+
 }

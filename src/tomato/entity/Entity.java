@@ -21,6 +21,7 @@ public class Entity
     protected boolean hitboxNeedsUpdate = true;
     protected int spriteWidth = 0;
     protected int spriteHeight = 0;
+    protected int health = 20;
 
     public void markForRemoval()
     {
@@ -305,5 +306,36 @@ public class Entity
         this.x = x;
         this.y = y;
         hitboxNeedsUpdate = true;
+    }
+
+    protected void logInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== Entity Info ===\n");
+        sb.append("Class: ").append(this.getClass().getSimpleName()).append("\n");
+        sb.append("Position: (").append(x).append(", ").append(y).append(")\n");
+        sb.append("Direction: ").append(currentDirection).append("\n");
+        sb.append("Speed: ").append(speed).append("\n");
+
+        if (currentSprite != null) {
+            sb.append("Sprite Size: ")
+                    .append(currentSprite.getWidth())
+                    .append("x")
+                    .append(currentSprite.getHeight())
+                    .append("\n");
+        } else {
+            sb.append("Sprite: null\n");
+        }
+
+        Rectangle hb = getHitbox();
+        sb.append("Hitbox: [x=")
+                .append(hb.x).append(", y=")
+                .append(hb.y).append(", w=")
+                .append(hb.width).append(", h=")
+                .append(hb.height).append("]\n");
+
+//        sb.append("Marked for removal: ").append(markedForRemoval).append("\n");
+        sb.append("===================\n");
+
+        System.out.println(sb.toString());
     }
 }

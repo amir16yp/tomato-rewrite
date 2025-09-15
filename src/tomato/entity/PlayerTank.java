@@ -17,8 +17,8 @@ public class PlayerTank extends Tank {
                 GameState.CURRENT_STATE = GameState.GameStateType.PAUSED;
             }
         });
-        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {turnRight();});
-        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> turnLeft());
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {turnLeft();});
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> {turnRight();});
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_SPACE, () -> {
             // Calculate center of the tank sprite
             double centerX = x + (currentSprite != null ? currentSprite.getWidth() / 4.0 : 0);
@@ -49,15 +49,6 @@ public class PlayerTank extends Tank {
 
         // Camera follows
         Game.RENDERER.getCamera().setPosition((float) getX(), (float) getY());
-    }
-
-    private void moveForward(double distance) {
-        switch (currentDirection) {
-            case NORTH: setY(this.y - distance); break;
-            case SOUTH: setY(this.y + distance); break;
-            case EAST:  setX(this.x + distance); break;
-            case WEST:  setX(this.x - distance); break;
-        }
     }
 
     private void turnLeft() {

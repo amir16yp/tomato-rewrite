@@ -129,7 +129,7 @@ public class GameLoop implements Runnable {
             Game.RENDERER.update();
             
             // Repaint on EDT
-            SwingUtilities.invokeLater(() -> Game.RENDERER.repaint());
+            Game.RENDERER.repaint();
             
             updateFPS(frameStartTime);
             

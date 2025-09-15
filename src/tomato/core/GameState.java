@@ -7,5 +7,5 @@ public class GameState
         PLAY
     }
 
-    public static GameStateType CURRENT_STATE = GameStateType.PAUSED;
+    public static GameStateType CURRENT_STATE = GameStateType.PLAY;
 }

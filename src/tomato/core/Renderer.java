@@ -1,180 +1,102 @@
 package tomato.core;
 
 import tomato.Game;
-import tomato.ui.MainMenu;
-import tomato.ui.Menu;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 
 public class Renderer extends JPanel {
 
-    private BufferedImage screenBuffer;
+    private VolatileImage backBuffer;
     private Camera camera;
 
-    private static Menu currentMenu;
-    private static MainMenu mainMenu = new MainMenu();
-    private static void setCurrentMenu(Menu newMenu)
-    {
-        if (currentMenu != null)
-        {
-            Game.GAME.removeMouseListener(currentMenu);
-            Game.GAME.removeMouseMotionListener(currentMenu);
-            Game.GAME.removeMouseWheelListener(currentMenu);
-        }
-        Game.GAME.addMouseListener(newMenu);
-        Game.GAME.addMouseMotionListener(newMenu);
-        Game.GAME.addMouseWheelListener(newMenu);
-        currentMenu = newMenu;
-    }
-
-
     public Renderer() {
-        // Try enabling hardware acceleration
-        System.setProperty("sun.java2d.opengl", "True");
-        System.setProperty("sun.java2d.d3d", "True");
-        System.setProperty("sun.java2d.ddforcevram", "True");
-
-        createScreenBuffer();
-        camera = new Camera();
-
-        setPreferredSize(new Dimension(Game.WIDTH, Game.HEIGHT));
+        setDoubleBuffered(false);
         setBackground(Color.BLACK);
-        setDoubleBuffered(false); // We're doing our own buffering
         setFocusable(true);
         requestFocus();
-        setCurrentMenu(mainMenu);
+
+        camera = new Camera();
+        setPreferredSize(new Dimension(Game.WIDTH, Game.HEIGHT));
+
+        createBackBuffer();
     }
 
-    private void createScreenBuffer() {
-        try {
-            GraphicsConfiguration gc = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice()
-                    .getDefaultConfiguration();
+    private void createBackBuffer() {
+        GraphicsConfiguration gc = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+                .getDefaultConfiguration();
 
-            screenBuffer = gc.createCompatibleImage(
-                    Game.WIDTH,
-                    Game.HEIGHT,
-                    Transparency.TRANSLUCENT
-            );
-
-            clearBuffer();
-        } catch (Exception e) {
-            System.err.println("[Renderer] Failed to create screen buffer: " + e.getMessage());
-            screenBuffer = null;
-        }
-    }
-
-    private void clearBuffer() {
-        if (screenBuffer == null) return;
-        Graphics2D g = screenBuffer.createGraphics();
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
-        g.dispose();
+        backBuffer = gc.createCompatibleVolatileImage(Game.WIDTH, Game.HEIGHT);
+        backBuffer.setAccelerationPriority(1.0f);
     }
 
     /**
-     * Call this before painting to ensure buffer is valid.
-     */
-    private void validateBuffer() {
-        if (screenBuffer == null) {
-            createScreenBuffer();
-        }
-    }
-
-    /**
-     * Main update method – your game loop calls this.
+     * Logic update only – no drawing.
      */
     public void update() {
-        validateBuffer();
-
-        if (screenBuffer != null) {
-            Graphics2D g = screenBuffer.createGraphics();
-            try {
-                // Fast rendering hints
-                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-                g.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_DISABLE);
-                g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_SPEED);
-
-                // Clear screen
-                g.setColor(Color.BLACK);
-                g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
-
-                if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
-                    // --- WORLD RENDERING ---
-                    camera.update(Game.GAME_LOOP.getDeltaTime());
-
-                    AffineTransform originalTransform = g.getTransform();
-                    camera.applyTransform(g, Game.WIDTH, Game.HEIGHT);
-
-                    World.WORLD.update();
-                    World.WORLD.render(g);
-
-                    camera.resetTransform(g, originalTransform);
-
-                } else if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
-                    // --- MENU RENDERING ---
-                    if (currentMenu != null) {
-                        currentMenu.setVisible(true);
-                        currentMenu.update();
-                        currentMenu.draw(g);
-                    }
-                }
-
-            } finally {
-                g.dispose();
-            }
+        if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
+            camera.update();
+            World.WORLD.update();
         }
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        // Don't call super.paintComponent to avoid clearing
-
-        validateBuffer();
-        if (screenBuffer == null) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, getWidth(), getHeight());
-            return;
-        }
-
-        Graphics2D g2d = (Graphics2D) g;
-
-        // Save hint
-        Object oldHint = g2d.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-
-        // Draw the buffer directly
-        g2d.drawImage(screenBuffer, 0, 0, getWidth(), getHeight(), null);
-
-        // Restore hint
-        if (oldHint != null) {
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, oldHint);
-        } else {
-            g2d.getRenderingHints().remove(RenderingHints.KEY_INTERPOLATION);
-        }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(Game.WIDTH, Game.HEIGHT);
-    }
-
-    @Override
-    public Dimension getMinimumSize() {
-        return getPreferredSize();
-    }
-
-    @Override
-    public Dimension getMaximumSize() {
-        return getPreferredSize();
+        // menus/paused logic later
     }
 
     /**
-     * Get the camera instance for controlling view
+     * Paints the current frame.
+     * This is called by Swing when you call repaint().
      */
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (backBuffer == null) {
+            createBackBuffer();
+        }
+
+        do {
+            int valid = backBuffer.validate(
+                    GraphicsEnvironment.getLocalGraphicsEnvironment()
+                            .getDefaultScreenDevice()
+                            .getDefaultConfiguration()
+            );
+            if (valid == VolatileImage.IMAGE_INCOMPATIBLE) {
+                createBackBuffer();
+            }
+
+            Graphics2D g2 = backBuffer.createGraphics();
+            try {
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+                // Clear
+                g2.setColor(Color.BLACK);
+                g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
+
+                if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
+                    AffineTransform original = g2.getTransform();
+                    camera.applyTransform(g2, Game.WIDTH, Game.HEIGHT);
+
+                    World.WORLD.render(g2);
+
+                    camera.resetTransform(g2, original);
+                } else {
+                    // paused/menu background
+                    g2.setColor(Color.DARK_GRAY);
+                    g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
+                }
+            } finally {
+                g2.dispose();
+            }
+        } while (backBuffer.contentsLost());
+
+        // Blit backBuffer onto screen
+        g.drawImage(backBuffer, 0, 0, getWidth(), getHeight(), null);
+    }
+
     public Camera getCamera() {
         return camera;
     }

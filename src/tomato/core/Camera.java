@@ -1,5 +1,7 @@
 package tomato.core;
 
+import tomato.Game;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -67,9 +69,9 @@ public class Camera {
     /**
      * Update camera interpolation (call this each frame)
      */
-    public void update(float deltaTime) {
+    public void update() {
         // Smooth interpolation to target position
-        float lerpFactor = 1.0f - (float) Math.pow(1.0f - lerpSpeed, deltaTime * 60.0f);
+        float lerpFactor = 1.0f - (float) Math.pow(1.0f - lerpSpeed, Game.GAME_LOOP.getDeltaTime() * 60.0f);
         
         x = lerp(x, targetX, lerpFactor);
         y = lerp(y, targetY, lerpFactor);
