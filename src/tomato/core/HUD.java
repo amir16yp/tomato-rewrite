@@ -22,7 +22,7 @@ public class HUD {
             renderPlayerHP(g, 32, Game.HEIGHT - 32);
         }
         renderStats(g);
-        renderHitboxes(g);
+//        renderHitboxes(g);
     }
 
     private void renderHitboxes(Graphics2D g) {
