@@ -23,6 +23,21 @@ public class Entity
     protected int spriteHeight = 0;
     protected int health = 20;
 
+    public void takeDamage(int damage) {
+        this.health -= damage;
+        if (this.health <= 0) {
+            markForRemoval();
+        }
+    }
+    
+    public int getHealth() {
+        return health;
+    }
+    
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     public void markForRemoval()
     {
         this.markedForRemoval = true;
@@ -287,6 +302,34 @@ public class Entity
                 return true;
             }
         }
+        return false;
+    }
+    
+    /**
+     * Check if this entity intersects with any non-projectile entity
+     * Used for collision prevention in movement
+     */
+    public boolean hasCollisionWithNonProjectiles()
+    {
+        Rectangle hitbox = this.getHitbox();
+        
+        for (Entity entity : World.WORLD.getWorldEntities())
+        {
+            if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox))
+            {
+                return true;
+            }
+        }
+        
+        // Also check collision with player entity if this is not the player
+        if (this != World.PLAYER_ENTITY && !(World.PLAYER_ENTITY instanceof Projectile))
+        {
+            if (World.PLAYER_ENTITY.getHitbox().intersects(hitbox))
+            {
+                return true;
+            }
+        }
+        
         return false;
     }
     

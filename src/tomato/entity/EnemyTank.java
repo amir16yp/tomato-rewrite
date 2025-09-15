@@ -39,11 +39,9 @@ public class EnemyTank extends Tank {
         double step = this.speed * Game.GAME_LOOP.getDeltaTime();
         moveForward(step);
 
-        // If colliding, back up & pick new dir
-        if (hasAnyIntersection()) {
-            moveForward(-step); // undo
-            pickRandomDirection();
-        }
+        // The collision detection is now handled inside moveForward() method
+        // No need for additional collision checking here since moveForward()
+        // will automatically prevent movement into colliding positions
 
         tryShoot();
     }
@@ -83,10 +81,6 @@ public class EnemyTank extends Tank {
             shoot();
             fireCooldownMs = FIRE_COOLDOWN_MS;
         }
-    }
-
-    private void shoot() {
-        Projectile.shootProjectile(x, y, this, currentDirection);
     }
 
     private void updateSprite() {

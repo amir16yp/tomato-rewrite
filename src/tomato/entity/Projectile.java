@@ -10,10 +10,16 @@ public class Projectile extends Entity{
 
     private Direction shootDirection;
     private Entity shooter;
+    private int damage;
     public Projectile(double x, double y, Entity shooter, Direction direction) {
+        this(x, y, shooter, direction, 10); // Default damage amount
+    }
+    
+    public Projectile(double x, double y, Entity shooter, Direction direction, int damage) {
         super(x, y);
         this.speed = 200;
         this.shooter = shooter;
+        this.damage = damage;
         this.shouldDrawHitbox = false;
         this.currentSprite = Utils.loadQOI("/tomato/assets/projectile.qoi");
         shootDirection = direction;
@@ -23,6 +29,16 @@ public class Projectile extends Entity{
     {
         Projectile projectile = new Projectile(x, y, shooter, direction);
         World.WORLD.getWorldEntities().add(projectile);
+    }
+    
+    public static void shootProjectile(double x, double y, Entity shooter, Direction direction, int damage)
+    {
+        Projectile projectile = new Projectile(x, y, shooter, direction, damage);
+        World.WORLD.getWorldEntities().add(projectile);
+    }
+    
+    public int getDamage() {
+        return damage;
     }
 
 
@@ -41,10 +57,20 @@ public class Projectile extends Entity{
             case WEST:  setX(this.x - adjustedSpeed); break;
         }
 
-        // Check for collision and mark for removal if hit
+        // Check for collision and deal damage if hit
         Entity hitEntity = getFirstEntityHit();
         if (hitEntity != null && hitEntity != shooter) {
-            // Handle collision (you can add damage logic here)
+            // Deal damage to the hit entity
+            hitEntity.takeDamage(this.damage);
+            this.markForRemoval();
+            return;
+        }   
+        
+        // Also check collision with player entity (stored separately)
+        if (World.PLAYER_ENTITY != null && World.PLAYER_ENTITY != shooter && 
+            this.getHitbox().intersects(World.PLAYER_ENTITY.getHitbox())) {
+            // Deal damage to the player
+            World.PLAYER_ENTITY.takeDamage(this.damage);
             this.markForRemoval();
         }
         

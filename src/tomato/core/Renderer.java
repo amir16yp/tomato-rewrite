@@ -10,6 +10,7 @@ import java.awt.image.VolatileImage;
 public class Renderer extends JPanel {
 
     private VolatileImage backBuffer;
+    private HUD hud;
     private Camera camera;
 
     public Renderer() {
@@ -17,7 +18,7 @@ public class Renderer extends JPanel {
         setBackground(Color.BLACK);
         setFocusable(true);
         requestFocus();
-
+        hud = new HUD();
         camera = new Camera();
         setPreferredSize(new Dimension(Game.WIDTH, Game.HEIGHT));
 
@@ -88,6 +89,7 @@ public class Renderer extends JPanel {
                     g2.setColor(Color.DARK_GRAY);
                     g2.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
                 }
+                hud.render(g2);
             } finally {
                 g2.dispose();
             }
