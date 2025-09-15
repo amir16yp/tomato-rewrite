@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class HUD {
     private static final BufferedImage HEART_SPRITE = Utils.loadQOI("/tomato/assets/heart.qoi");
-    private static final Font MONO_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 14);
+    private static final Font MONO_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 10);
 
     // TODO add a static field of a monospaced font instance
 
@@ -47,13 +47,27 @@ public class HUD {
     }
 
     private void renderStats(Graphics2D g) {
-        String sb = "FPS: " + Game.GAME_LOOP.getFPS() +
+        World.Chunk chunk = World.PLAYER_ENTITY.getChunk();
+        double px = World.PLAYER_ENTITY.getX();
+        double py = World.PLAYER_ENTITY.getY();
+
+        // first line
+        String line1 = "FPS: " + Game.GAME_LOOP.getFPS() +
                 " | Δt: " + String.format("%.4f", Game.GAME_LOOP.getDeltaTime()) +
                 " | Entities: " + World.WORLD.getWorldEntities().size() +
                 " | Chunks: " + World.WORLD.getLoadedChunkCount();
 
-        drawMonospace(g, 16, 24, sb, Color.WHITE);
+        // second line
+        String line2 = "X: " + String.format("%.1f", px) +
+                " Y: " + String.format("%.1f", py) +
+                " | CX: " + chunk.cx +
+                " CY: " + chunk.cy;
+
+        drawMonospace(g, 16, 24, line1, Color.WHITE);
+        drawMonospace(g, 16, 40, line2, Color.WHITE);
+
     }
+
 
 
     private void renderPlayerHP(Graphics2D g, int x, int y) {

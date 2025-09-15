@@ -134,7 +134,7 @@ public class World {
     }
 
     public class Chunk {
-        int cx, cy;
+        public int cx, cy;
         int worldX, worldY;
         BufferedImage image;
 
