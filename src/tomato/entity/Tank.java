@@ -8,6 +8,7 @@ public class Tank extends Entity{
         super(x, y);
         this.currentDirection = Direction.SOUTH;
         this.currentSprite = Utils.loadQOI("/tomato/assets/tank.qoi");
+        this.shouldDrawHitbox = true;
     }
 
     protected void moveForward(double distance) {

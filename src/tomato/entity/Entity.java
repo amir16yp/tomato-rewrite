@@ -87,32 +87,32 @@ public class Entity
         
         return intersectsEntity(otherEntity);
     }
-
-    public Rectangle getHitbox() {
-        if (currentSprite == null) {
-            return new Rectangle((int)x, (int)y, 0, 0);
-        }
-
-        // Use cached hitbox if position hasn't changed and hitbox is valid
-        if (cachedHitbox != null && !hitboxNeedsUpdate) {
-            cachedHitbox.x = (int)x;
-            cachedHitbox.y = (int)y;
-            return cachedHitbox;
-        }
-
-        // For performance, use simple bounding box for most entities
-        // Override this method in specific entities that need pixel-perfect collision
-        int width = currentSprite.getWidth();
-        int height = currentSprite.getHeight();
-        
-        cachedHitbox = new Rectangle((int)x, (int)y, width, height);
-        hitboxNeedsUpdate = false;
-        
-        return cachedHitbox;
-    }
+//
+//    public Rectangle getHitbox() {
+//        if (currentSprite == null) {
+//            return new Rectangle((int)x, (int)y, 0, 0);
+//        }
+//
+//        // Use cached hitbox if position hasn't changed and hitbox is valid
+//        if (cachedHitbox != null && !hitboxNeedsUpdate) {
+//            cachedHitbox.x = (int)x;
+//            cachedHitbox.y = (int)y;
+//            return cachedHitbox;
+//        }
+//
+//        // For performance, use simple bounding box for most entities
+//        // Override this method in specific entities that need pixel-perfect collision
+//        int width = currentSprite.getWidth();
+//        int height = currentSprite.getHeight();
+//
+//        cachedHitbox = new Rectangle((int)x, (int)y, width, height);
+//        hitboxNeedsUpdate = false;
+//
+//        return cachedHitbox;
+//    }
     
     // Pixel-perfect hitbox calculation - only use when necessary
-    protected Rectangle getPixelPerfectHitbox() {
+    protected Rectangle getHitbox() {
         if (currentSprite == null) {
             return new Rectangle((int)x, (int)y, 0, 0);
         }
