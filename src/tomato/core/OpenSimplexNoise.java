@@ -21,17 +21,12 @@ public class OpenSimplexNoise {
             -5, -2, -2, -5,
     };
 
-    public OpenSimplexNoise() {
-        this(DEFAULT_SEED);
-    }
-
-    public OpenSimplexNoise(long seed) {
+    public OpenSimplexNoise(Random random) {
         perm = new short[256];
         permGradIndex2D = new short[256];
         short[] source = new short[256];
         for (short i = 0; i < 256; i++)
             source[i] = i;
-        Random random = new Random(seed);
         for (int i = 255; i >= 0; i--) {
             int r = random.nextInt(i + 1);
             perm[i] = source[r];

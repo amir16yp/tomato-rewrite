@@ -33,7 +33,7 @@ public class GameLoop implements Runnable {
     }
 
     public int getTargetFPS() {
-        return 0;
+        return 0 ;
     }
 
     public float getTimeScale() {

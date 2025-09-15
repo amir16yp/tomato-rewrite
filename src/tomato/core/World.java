@@ -22,7 +22,6 @@ public class World {
     private final int cellSize;
     private final int chunkSizeCells;
     private final OpenSimplexNoise noise;
-    private final long seed;
 
     // Infinite chunk storage
     private final Map<Point, Chunk> chunks = new HashMap<>();
@@ -42,14 +41,15 @@ public class World {
     public static Entity PLAYER_ENTITY = new PlayerTank();
 
     private WorldType worldType;
-
+    private Random random;
     public World(int chunkSizeCells, int cellSize, long seed,WorldType worldType)
     {
         this.worldType = worldType;
         this.chunkSizeCells = chunkSizeCells;
         this.cellSize = cellSize;
-        this.seed = seed;
-        this.noise = new OpenSimplexNoise(seed);
+//        this.seed = seed;
+        this.random = new Random(seed);
+        this.noise = new OpenSimplexNoise(random);
         this.vfxManager = new VFXManager();
     }
 
@@ -93,7 +93,7 @@ public class World {
                 Point key = new Point(cx, cy);
 
                 // bake or reuse
-                Chunk chunk = chunks.computeIfAbsent(key, k -> new Chunk(cx, cy));
+                Chunk chunk = chunks.computeIfAbsent(key, k -> new Chunk(cx, cy, random));
 
                 // render it
                 g.drawImage(chunk.image, chunk.worldX, chunk.worldY, null);
@@ -167,10 +167,11 @@ public class World {
         public int cx, cy;
         int worldX, worldY;
         BufferedImage image;
-
-        public Chunk(int cx, int cy) {
+        private final Random rng;
+        public Chunk(int cx, int cy, Random rng) {
             this.cx = cx;
             this.cy = cy;
+            this.rng = rng;
             this.worldX = cx * chunkSizeCells * cellSize;
             this.worldY = cy * chunkSizeCells * cellSize;
             switch (worldType) {
@@ -184,6 +185,19 @@ public class World {
                     bakeGrassland();
                     break;
             }
+        }
+
+        public Point getRandomWorldCoordinate() {
+            int w = chunkSizeCells * cellSize;
+            int h = chunkSizeCells * cellSize;
+
+            int localX = rng.nextInt(w); // pixel offset inside this chunk
+            int localY = rng.nextInt(h);
+
+            int worldX = this.worldX + localX;
+            int worldY = this.worldY + localY;
+
+            return new Point(worldX, worldY);
         }
 
         public Rectangle getBounds() {
