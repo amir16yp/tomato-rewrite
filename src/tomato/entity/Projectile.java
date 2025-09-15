@@ -1,49 +1,49 @@
 package tomato.entity;
 
 import tomato.Game;
+import tomato.core.SpriteCache;
 import tomato.core.Utils;
 import tomato.core.World;
 import tomato.vfx.DynamicLightSource;
 
 import java.awt.*;
+import java.util.HashMap;
 
 public class Projectile extends Entity implements DynamicLightSource {
 
     private final Direction shootDirection;
     private final Entity shooter;
-    private final int damage;
 
-    public Projectile(double x, double y, Entity shooter, Direction direction) {
-        this(x, y, shooter, direction, 10); // Default damage amount
+
+    private static final HashMap<EntityType, Integer> projectileTypeMap = new HashMap<EntityType, Integer>();
+
+    static {
+        projectileTypeMap.put(EntityType.REGULAR_PROJECTILE, 5);
+        projectileTypeMap.put(EntityType.GOLD_PROJECTILE, 15);
     }
 
-    public Projectile(double x, double y, Entity shooter, Direction direction, int damage) {
+    public Projectile(double x, double y, Entity shooter, Direction direction) {
+        this(x, y, shooter, direction, EntityType.REGULAR_PROJECTILE); // Default damage amount
+    }
+
+    public Projectile(double x, double y, Entity shooter, Direction direction, EntityType entityTypeTex) {
         super(x, y);
         World.WORLD.getVFXManager().getLighting().addLightSource(this);
-        this.entityType = EntityType.REGULAR_PROJECTILE;
+        this.entityType = entityTypeTex;
         this.speed = 500;
         this.shooter = shooter;
-        this.damage = damage;
+
         this.shouldDrawHitbox = false;
-        this.currentSprite = Utils.loadQOI("/tomato/assets/projectile.qoi");
+        this.currentSprite = SpriteCache.queryCache(entityTypeTex, direction);
         shootDirection = direction;
         
         // Set up collision action for damage dealing
-        this.setCollisionAction(new ProjectileDamageAction(damage, shooter));
+        this.setCollisionAction(new ProjectileDamageAction(projectileTypeMap.get(entityTypeTex), shooter));
     }
 
-    public static void shootProjectile(double x, double y, Entity shooter, Direction direction) {
-        Projectile projectile = new Projectile(x, y, shooter, direction);
+    public static void shootProjectile(double x, double y, Entity shooter, Direction direction, EntityType entityTypeTex) {
+        Projectile projectile = new Projectile(x, y, shooter, direction, entityTypeTex);
         World.WORLD.getWorldEntities().add(projectile);
-    }
-
-    public static void shootProjectile(double x, double y, Entity shooter, Direction direction, int damage) {
-        Projectile projectile = new Projectile(x, y, shooter, direction, damage);
-        World.WORLD.getWorldEntities().add(projectile);
-    }
-
-    public int getDamage() {
-        return damage;
     }
 
 

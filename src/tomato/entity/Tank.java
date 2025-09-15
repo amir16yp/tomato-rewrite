@@ -10,7 +10,6 @@ public class Tank extends Entity {
     public Tank(double x, double y) {
         super(x, y);
         this.currentDirection = Direction.SOUTH;
-        this.currentSprite = Utils.loadQOI("/tomato/assets/tank.qoi");
 //        this.shouldDrawHitbox = true;
         
         // Set up collision action for tanks
@@ -56,7 +55,7 @@ public class Tank extends Entity {
         }
     }
 
-    protected void shoot() {
+    protected void shoot(EntityType projectileType) {
         // Calculate center of the tank sprite using more precise positioning
         double centerX = x + (currentSprite != null ? currentSprite.getWidth() / 4.0 : 0);
         double centerY = y + (currentSprite != null ? currentSprite.getHeight() / 4.0 : 0);
@@ -78,7 +77,7 @@ public class Tank extends Entity {
                 break;
         }
         
-        Projectile.shootProjectile(centerX, centerY, this, currentDirection);
+        Projectile.shootProjectile(centerX, centerY, this, currentDirection,projectileType);
     }
 
 }

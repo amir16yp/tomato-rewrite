@@ -5,5 +5,6 @@ public enum EntityType {
     PLAYER_TANK,
     LANDMINE,
     RED_ENEMY_TANK,
-    REGULAR_PROJECTILE
+    REGULAR_PROJECTILE,
+    GOLD_PROJECTILE
 }

@@ -2,6 +2,7 @@ package tomato.entity;
 
 import tomato.Game;
 import tomato.core.Mathf;
+import tomato.core.SpriteCache;
 import tomato.core.World;
 
 import java.awt.*;
@@ -20,7 +21,7 @@ public class EnemyTank extends Tank {
         super(x, y);
         this.entityType = EntityType.RED_ENEMY_TANK;
         this.speed = 120;
-        this.currentSprite = tomato.core.Utils.loadQOI("/tomato/assets/tank_red.qoi");
+        this.currentSprite = SpriteCache.queryCache(EntityType.RED_ENEMY_TANK, Direction.SOUTH);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class EnemyTank extends Tank {
                 (Math.abs(dy) < 10 &&
                         (currentDirection == Direction.EAST || currentDirection == Direction.WEST))) {
 
-            shoot();
+            shoot(EntityType.REGULAR_PROJECTILE);
             fireCooldownMs = FIRE_COOLDOWN_MS;
         }
     }

@@ -1,7 +1,9 @@
 package tomato.core;
 
 import tomato.Game;
+import tomato.entity.Direction;
 import tomato.entity.Entity;
+import tomato.entity.EntityType;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -11,6 +13,8 @@ public class HUD {
     private static final BufferedImage HEART_SPRITE = Utils.loadQOI("/tomato/assets/heart.qoi");
     public static final Font MONO_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 10);
 
+    private static final BufferedImage AMMO_SPRITE = SpriteCache.queryCache(EntityType.REGULAR_PROJECTILE, Direction.NORTH);
+
     // TODO add a static field of a monospaced font instance
 
     public HUD() {
@@ -19,25 +23,15 @@ public class HUD {
 
     public void render(Graphics2D g) {
         if (World.PLAYER_ENTITY != null) {
-            renderPlayerHP(g, 32, Game.HEIGHT - 32);
+            int playerHudY = Game.HEIGHT - 32;
+            renderPlayerHP(g, 32, playerHudY);
+            renderPlayerAmmo(g, 32, playerHudY-32);
         }
         renderStats(g);
-//        renderHitboxes(g);
     }
 
-    private void renderHitboxes(Graphics2D g) {
-        AffineTransform original = g.getTransform();
-        Game.RENDERER.getCamera().applyTransform(g, Game.WIDTH, Game.HEIGHT);
-
-        g.setColor(Color.RED);
-        for (Entity entity : World.WORLD.getWorldEntities()) {
-            Rectangle cage = entity.getHitbox();
-            if (cage != null) {
-                g.drawRect(cage.x, cage.y, cage.width, cage.height);
-            }
-        }
-
-        g.setTransform(original);
+    private void renderPlayerAmmo(Graphics2D g, int x, int y){
+        g.drawImage(AMMO_SPRITE, x, y, null);
     }
 
     private void drawMonospace(Graphics2D g, int x, int y, String str, Color color) {
@@ -66,7 +60,6 @@ public class HUD {
         drawMonospace(g, 16, 40, line2, Color.WHITE);
 
     }
-
 
 
     private void renderPlayerHP(Graphics2D g, int x, int y) {
