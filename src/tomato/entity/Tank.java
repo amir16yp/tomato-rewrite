@@ -24,9 +24,9 @@ public class Tank extends Entity{
             case WEST:  setX(this.x - distance); break;
         }
         
-        // Check for collision with other entities (excluding projectiles)
+        // Check for collision with other entities (excluding projectiles) OR out of bounds
         if (hasCollisionWithNonProjectiles()) {
-            // Revert to original position if collision detected
+            // Revert to original position if collision or bounds violation detected
             setX(originalX);
             setY(originalY);
         }

@@ -81,7 +81,7 @@ public class Renderer extends JPanel {
                     AffineTransform original = g2.getTransform();
                     camera.applyTransform(g2, Game.WIDTH, Game.HEIGHT);
 
-                    World.WORLD.render(g2);
+                    World.WORLD.render(g2, camera.getViewBounds(Game.WIDTH, Game.HEIGHT));
 
                     camera.resetTransform(g2, original);
                 } else {

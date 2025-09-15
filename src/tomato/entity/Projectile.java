@@ -74,19 +74,26 @@ public class Projectile extends Entity{
             this.markForRemoval();
         }
         
-        // Remove projectile if it goes off screen (optional bounds check)
-        if (isOutOfBounds()) {
-            this.markForRemoval();
-        }
+//        // Remove projectile if it goes off screen (optional bounds check)
+//        if (isProjectileOutOfBounds()) {
+//            this.markForRemoval();
+//        }
     }
     
-    /**
-     * Check if projectile is out of world bounds
-     */
-    private boolean isOutOfBounds() {
-        // Adjust these bounds based on your world size
-        return x < -50 || x > 1100 || y < -50 || y > 1100;
-    }
+//    /**
+//     * Check if projectile is out of world bounds
+//     * Projectiles are allowed to go slightly beyond world boundaries before removal
+//     */
+//    private boolean isProjectileOutOfBounds() {
+//        // Get world dimensions from the chunk system
+//        final int WORLD_WIDTH = World.WORLD.getWorldWidth();
+//        final int WORLD_HEIGHT = World.WORLD.getWorldHeight();
+//
+//        // Allow projectiles to go slightly beyond world boundaries before removal
+//        final int BUFFER = 50;
+//        return x < -BUFFER || x > WORLD_WIDTH + BUFFER ||
+//               y < -BUFFER || y > WORLD_HEIGHT + BUFFER;
+//    }
     
     /**
      * Override getHitbox for smaller, more precise projectile collision

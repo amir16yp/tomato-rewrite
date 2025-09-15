@@ -287,23 +287,7 @@ public class Entity
         }
         return null;
     }
-    
-    /**
-     * Check if this entity intersects with any other entity (fast boolean check)
-     */
-    public boolean hasAnyIntersection()
-    {
-        Rectangle hitbox = this.getHitbox();
-        
-        for (Entity entity : World.WORLD.getWorldEntities())
-        {
-            if (entity != this && entity.getHitbox().intersects(hitbox))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+
     
     /**
      * Check if this entity intersects with any non-projectile entity
@@ -312,7 +296,6 @@ public class Entity
     public boolean hasCollisionWithNonProjectiles()
     {
         Rectangle hitbox = this.getHitbox();
-        
         for (Entity entity : World.WORLD.getWorldEntities())
         {
             if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox))
@@ -333,6 +316,32 @@ public class Entity
         return false;
     }
     
+//    /**
+//     * Check if this entity would be out of world bounds at the given position
+//     * Projectiles are exempt from bounds checking
+//     */
+//    public boolean wouldBeOutOfBounds(double x, double y) {
+//        // Projectiles can go out of bounds
+//        if (this instanceof Projectile) {
+//            return false;
+//        }
+//
+//        // Get world dimensions from the chunk system
+//        final int WORLD_WIDTH = World.WORLD.getWorldWidth();
+//        final int WORLD_HEIGHT = World.WORLD.getWorldHeight();
+//
+//        Rectangle hitbox = getHitbox();
+//        int entityWidth = hitbox.width;
+//        int entityHeight = hitbox.height;
+//
+//        // Check if entity would be outside world bounds
+//        return x < 0 || y < 0 ||
+//               x + entityWidth > WORLD_WIDTH ||
+//               y + entityHeight > WORLD_HEIGHT;
+//    }
+//
+
+
     public double getX() { return x; }
     public double getY() { return y; }
     public void setX(double x) { 

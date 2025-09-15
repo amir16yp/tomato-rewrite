@@ -16,13 +16,13 @@ public class Camera {
     public Camera() {
         this.x = 0;
         this.y = 0;
-        this.zoom = 1.0f;   
+        this.zoom = 1f;
         this.targetX = 0;
         this.targetY = 0;
         this.targetZoom = 1.0f;
         this.lerpSpeed = 0.1f; // Smooth camera movement
     }
-    
+
     public Camera(float x, float y, float zoom) {
         this.x = x;
         this.y = y;
@@ -42,7 +42,17 @@ public class Camera {
         this.targetX = x;
         this.targetY = y;
     }
-    
+
+    public Rectangle getViewBounds(int screenWidth, int screenHeight) {
+        int viewW = (int) (screenWidth / zoom);
+        int viewH = (int) (screenHeight / zoom);
+
+        int left = (int) (x - viewW / 2);
+        int top  = (int) (y - viewH / 2);
+
+        return new Rectangle(left, top, viewW, viewH);
+    }
+
     /**
      * Set the target position for smooth camera movement
      */
@@ -77,7 +87,7 @@ public class Camera {
         y = lerp(y, targetY, lerpFactor);
         zoom = lerp(zoom, targetZoom, lerpFactor);
     }
-    
+
     private float lerp(float a, float b, float t) {
         return a + (b - a) * t;
     }
