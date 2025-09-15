@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="tomato-rewrite:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/tomato_rewrite_jar</output-path>
+    <root id="archive" name="tomato-rewrite.jar">
+      <element id="module-output" name="tomato-rewrite" />
+    </root>
+  </artifact>
+</component>

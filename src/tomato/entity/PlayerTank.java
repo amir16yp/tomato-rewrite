@@ -11,12 +11,12 @@ public class PlayerTank extends Tank {
     public PlayerTank() {
         super(200, 200);
         this.speed = 100.0;
-        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
-            if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY)
-            {
-                GameState.CURRENT_STATE = GameState.GameStateType.PAUSED;
-            }
-        });
+        // Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
+        //     if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY)
+        //     {
+        //         GameState.CURRENT_STATE = GameState.GameStateType.PAUSED;
+        //     }
+        // });
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {turnLeft();});
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> {turnRight();});
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_SPACE, () -> {
