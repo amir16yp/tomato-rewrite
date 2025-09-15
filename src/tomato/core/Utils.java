@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Utils {
+
     public static BufferedImage loadQOI(String pathFromJar) {
         try {
             // Get the resource stream

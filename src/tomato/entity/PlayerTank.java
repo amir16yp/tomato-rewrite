@@ -6,7 +6,9 @@ import tomato.core.SpriteCache;
 import tomato.core.Utils;
 import tomato.core.World;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class PlayerTank extends Tank {
 
@@ -38,8 +40,13 @@ public class PlayerTank extends Tank {
 
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_X, () -> {
             // debug key
-//            World.WORLD.spawnRedEnemy(120, 120);
-            World.WORLD.spawnRedEnemy(120, 120);
+            Point spawnPoint = this.getChunk().getRandomWorldCoordinate();
+            if (new Random().nextBoolean())
+            {
+                World.WORLD.spawnRedEnemy(spawnPoint.x, spawnPoint.y);
+            } else {
+                World.WORLD.spawnLandmine(spawnPoint.x, spawnPoint.y);
+            }
         });
 
     }
