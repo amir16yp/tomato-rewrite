@@ -37,7 +37,7 @@ public class Game extends JFrame {
     public Game() {
         GAME = this;
         KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
-            if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY)
+            if (GameState.isPlaying())
             {
                 GameState.Pause();
             }

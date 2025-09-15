@@ -21,11 +21,11 @@ public class Entity {
     protected boolean hitboxNeedsUpdate = true;
     protected int spriteWidth = 0;
     protected int spriteHeight = 0;
-    protected int health = 20;
+    protected int health = 50;
     protected EntityType entityType;
     protected boolean rotatable = true;
     protected CollisionAction collisionAction;
-
+    protected int maxHealth = 50;
     // TODO: enemy tanks should not exit their spawn chunks
     // TODO: projectiles should be marked for removal after it traveled through an entire chunk without hitting anything
     // TODO: use GameState to show different screens (death screen, pause)
@@ -63,6 +63,10 @@ public class Entity {
 
     public int getHealth() {
         return health;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
     }
 
     public void setHealth(int health) {

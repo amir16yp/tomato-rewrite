@@ -22,4 +22,9 @@ public class GameState {
     {
         return CURRENT_STATE == GameStateType.PAUSED;
     }
+
+    public static boolean isPlaying()
+    {
+        return CURRENT_STATE == GameStateType.PAUSED;
+    }
 }
