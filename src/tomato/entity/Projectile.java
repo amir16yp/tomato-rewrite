@@ -3,10 +3,11 @@ package tomato.entity;
 import tomato.Game;
 import tomato.core.Utils;
 import tomato.core.World;
+import tomato.vfx.DynamicLightSource;
 
 import java.awt.*;
 
-public class Projectile extends Entity {
+public class Projectile extends Entity implements DynamicLightSource {
 
     private final Direction shootDirection;
     private final Entity shooter;
@@ -18,6 +19,7 @@ public class Projectile extends Entity {
 
     public Projectile(double x, double y, Entity shooter, Direction direction, int damage) {
         super(x, y);
+        World.WORLD.getVFXManager().getLighting().addLightSource(this);
         this.entityType = EntityType.REGULAR_PROJECTILE;
         this.speed = 500;
         this.shooter = shooter;
@@ -25,6 +27,9 @@ public class Projectile extends Entity {
         this.shouldDrawHitbox = false;
         this.currentSprite = Utils.loadQOI("/tomato/assets/projectile.qoi");
         shootDirection = direction;
+        
+        // Set up collision action for damage dealing
+        this.setCollisionAction(new ProjectileDamageAction(damage, shooter));
     }
 
     public static void shootProjectile(double x, double y, Entity shooter, Direction direction) {
@@ -61,52 +66,48 @@ public class Projectile extends Entity {
                 setX(this.x + adjustedSpeed);
                 break;
             case WEST:
+                if (isInUnloadedChunk()) {
+                    markForRemoval();
+                }
                 setX(this.x - adjustedSpeed);
                 break;
         }
 
-        if (isInUnloadedChunk()) {
-            markForRemoval();
-        }
 
-        // Check for collision and deal damage if hit
-        Entity hitEntity = getFirstEntityHit();
-        if (hitEntity != null && hitEntity != shooter) {
-            // Deal damage to the hit entity
-            hitEntity.takeDamage(this.damage);
-            this.markForRemoval();
-            return;
-        }
 
         // Also check collision with player entity (stored separately)
         if (World.PLAYER_ENTITY != null && World.PLAYER_ENTITY != shooter &&
                 this.getHitbox().intersects(World.PLAYER_ENTITY.getHitbox())) {
-            // Deal damage to the player
-            World.PLAYER_ENTITY.takeDamage(this.damage);
-            this.markForRemoval();
+            // Use collision action to handle player collision
+            if (collisionAction != null) {
+                collisionAction.onCollide(this, World.PLAYER_ENTITY);
+            }
         }
-
-
-//        // Remove projectile if it goes off screen (optional bounds check)
-//        if (isProjectileOutOfBounds()) {
-//            this.markForRemoval();
-//        }
     }
 
-//    /**
-//     * Check if projectile is out of world bounds
-//     * Projectiles are allowed to go slightly beyond world boundaries before removal
-//     */
-//    private boolean isProjectileOutOfBounds() {
-//        // Get world dimensions from the chunk system
-//        final int WORLD_WIDTH = World.WORLD.getWorldWidth();
-//        final int WORLD_HEIGHT = World.WORLD.getWorldHeight();
-//
-//        // Allow projectiles to go slightly beyond world boundaries before removal
-//        final int BUFFER = 50;
-//        return x < -BUFFER || x > WORLD_WIDTH + BUFFER ||
-//               y < -BUFFER || y > WORLD_HEIGHT + BUFFER;
-//    }
+    @Override
+    public void markForRemoval() {
+        World.WORLD.getVFXManager().getLighting().removeLightSource(this);
+        super.markForRemoval();
+    }
 
+    @Override
+    public int getLightX() {
+        return (int) this.getHitbox().getCenterX();
+    }
 
+    @Override
+    public int getLightY() {
+        return (int) this.getHitbox().getCenterY();
+    }
+
+    @Override
+    public int getLightRadius() {
+        return 15;
+    }
+
+    @Override
+    public float getLightStrength() {
+        return 1.0f;
+    }
 }

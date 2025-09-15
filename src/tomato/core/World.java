@@ -2,7 +2,9 @@ package tomato.core;
 
 import tomato.entity.EnemyTank;
 import tomato.entity.Entity;
+import tomato.entity.LandmineEntity;
 import tomato.entity.PlayerTank;
+import tomato.vfx.VFXManager;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,6 +31,8 @@ public class World {
     private final int renderDistance = 1;
 
     public static World WORLD;
+    
+    private final VFXManager vfxManager;
 
     public static void createWorld(WorldType type)
     {
@@ -46,6 +50,7 @@ public class World {
         this.cellSize = cellSize;
         this.seed = seed;
         this.noise = new OpenSimplexNoise(seed);
+        this.vfxManager = new VFXManager();
     }
 
     public Chunk getChunkAtWorld(double worldX, double worldY) {
@@ -68,6 +73,9 @@ public class World {
                 worldEntities.remove(entity);
             }
         }
+        
+        // Update VFX system
+        vfxManager.update();
     }
 
     public void render(Graphics2D g, Rectangle cameraView) {
@@ -106,6 +114,9 @@ public class World {
                 entity.render(g);
             }
         });
+        
+        // Render VFX system (particles and lighting) with camera view
+        vfxManager.render(g, cameraView);
     }
 
     public int getLoadedChunkCount() {
@@ -129,6 +140,15 @@ public class World {
 
     public void spawnRedEnemy(double x, double y) {
         worldEntities.add(new EnemyTank(x, y));
+    }
+
+    public void spawnLandmine(double x, double y)
+    {
+        worldEntities.add(new LandmineEntity(x, y));
+    }
+    
+    public VFXManager getVFXManager() {
+        return vfxManager;
     }
 
     public int getCellSize() {

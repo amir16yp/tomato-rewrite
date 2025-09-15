@@ -1,14 +1,12 @@
 package tomato.core;
 
-import java.util.logging.Logger;
-
 /**
  * Mathf - Fast math utility class with precached trigonometric values
  * Improves performance by storing precomputed values of sin, cos, and tan
  * for commonly used angles.
  */
 public class Mathf {
-    private static final Logger logger = Logger.getLogger(Mathf.class.getName());
+//    private static final Logger logger = Logger.getLogger(Mathf.class.getName());
 
     // Size of the lookup tables (higher values give more precision)
     private static final int TABLE_SIZE = 4096;
@@ -46,7 +44,7 @@ public class Mathf {
             COS_TABLE[i] = Math.cos(angle);
             TAN_TABLE[i] = Math.tan(angle);
         }
-        logger.info("Mathf: Trigonometric tables initialized with " + TABLE_SIZE + " entries");
+//        logger.info("Mathf: Trigonometric tables initialized with " + TABLE_SIZE + " entries");
     }
 
     /**

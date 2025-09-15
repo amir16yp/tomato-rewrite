@@ -29,7 +29,8 @@ public class PlayerTank extends Tank {
 
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_X, () -> {
             // debug key
-            World.WORLD.spawnRedEnemy(120, 120);
+//            World.WORLD.spawnRedEnemy(120, 120);
+            World.WORLD.spawnLandmine(120, 120);
         });
 
     }

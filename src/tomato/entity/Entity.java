@@ -23,6 +23,8 @@ public class Entity {
     protected int spriteHeight = 0;
     protected int health = 20;
     protected EntityType entityType;
+    protected boolean rotatable = true;
+    protected CollisionAction collisionAction;
 
     // TODO: enemy tanks should not exit their spawn chunks
     // TODO: projectiles should be marked for removal after it traveled through an entire chunk without hitting anything
@@ -30,6 +32,14 @@ public class Entity {
     // TODO: add different enemy types and sprite variants (damage, etc)
     // TODO: explosion VFX
     // TODO: more mechanics (armor, ammo?)
+
+    public void setCollisionAction(CollisionAction action) {
+        this.collisionAction = action;
+    }
+
+    public CollisionAction getCollisionAction() {
+        return this.collisionAction;
+    }
 
     public void takeDamage(int damage) {
         this.health -= damage;
@@ -80,10 +90,12 @@ public class Entity {
     }
 
     public void update() {
-        if (rotatedSprites == null) {
+        if (rotatedSprites == null && rotatable) {
             createRotatedSprites(this.currentSprite);
             updateCurrentSprite();
         }
+        // Handle collisions using the collision action system
+        handleCollisions();
     }
 
     public boolean isInUnloadedChunk() {
@@ -95,22 +107,6 @@ public class Entity {
         return otherEntity.getHitbox().intersects(this.getHitbox());
     }
 
-    /**
-     * Fast distance-based collision check before expensive hitbox intersection
-     */
-    public boolean couldIntersectEntity(Entity otherEntity) {
-        if (otherEntity == this) return false;
-
-        // Quick distance check first using optimized Mathf distance
-        double distance = Mathf.distance(this.x, this.y, otherEntity.x, otherEntity.y);
-        double maxDistance = 100; // Adjust based on your largest entity size
-
-        if (distance > maxDistance) {
-            return false;
-        }
-
-        return intersectsEntity(otherEntity);
-    }
 
     public Rectangle getHitbox() {
         if (currentSprite == null) {
@@ -224,6 +220,14 @@ public class Entity {
         return entitiesIntersected;
     }
 
+    public void handleCollisions() {
+        Entity hit = getFirstEntityHit();
+        if (hit != null && collisionAction != null) {
+            collisionAction.onCollide(this, hit);
+        }
+    }
+
+
     /**
      * Fast collision check - returns first entity hit (optimized for projectiles)
      */
@@ -258,32 +262,6 @@ public class Entity {
 
         return false;
     }
-
-//    /**
-//     * Check if this entity would be out of world bounds at the given position
-//     * Projectiles are exempt from bounds checking
-//     */
-//    public boolean wouldBeOutOfBounds(double x, double y) {
-//        // Projectiles can go out of bounds
-//        if (this instanceof Projectile) {
-//            return false;
-//        }
-//
-//        // Get world dimensions from the chunk system
-//        final int WORLD_WIDTH = World.WORLD.getWorldWidth();
-//        final int WORLD_HEIGHT = World.WORLD.getWorldHeight();
-//
-//        Rectangle hitbox = getHitbox();
-//        int entityWidth = hitbox.width;
-//        int entityHeight = hitbox.height;
-//
-//        // Check if entity would be outside world bounds
-//        return x < 0 || y < 0 ||
-//               x + entityWidth > WORLD_WIDTH ||
-//               y + entityHeight > WORLD_HEIGHT;
-//    }
-//
-
 
     public double getX() {
         return x;

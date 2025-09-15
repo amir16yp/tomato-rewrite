@@ -2,6 +2,8 @@ package tomato.entity;
 
 import tomato.core.Mathf;
 import tomato.core.Utils;
+import tomato.core.World;
+import java.awt.Rectangle;
 
 public class Tank extends Entity {
 
@@ -10,6 +12,8 @@ public class Tank extends Entity {
         this.currentDirection = Direction.SOUTH;
         this.currentSprite = Utils.loadQOI("/tomato/assets/tank.qoi");
 //        this.shouldDrawHitbox = true;
+        
+        // Set up collision action for tanks
     }
 
     protected void moveForward(double distance) {
@@ -35,7 +39,18 @@ public class Tank extends Entity {
 
         // Check for collision with other entities (excluding projectiles) OR out of bounds
         if (hasCollisionWithNonProjectiles()) {
-            // Revert to original position if collision or bounds violation detected
+            // Find the entity we collided with and trigger its collision action
+            Rectangle hitbox = this.getHitbox();
+            for (Entity entity : World.WORLD.getWorldEntities()) {
+                if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox)) {
+                    if (entity.getCollisionAction() != null) {
+                        entity.getCollisionAction().onCollide(entity, this);
+                    }
+                    break; // Only handle the first collision
+                }
+            }
+            
+            // Revert to original position if collision detected
             setX(originalX);
             setY(originalY);
         }

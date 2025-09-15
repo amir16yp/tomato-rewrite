@@ -17,4 +17,9 @@ public class GameState {
     {
         CURRENT_STATE = GameStateType.PLAY;
     }
+
+    public static boolean isPaused()
+    {
+        return CURRENT_STATE == GameStateType.PAUSED;
+    }
 }

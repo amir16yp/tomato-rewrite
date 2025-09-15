@@ -41,7 +41,7 @@ public class Renderer extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
+                if (GameState.isPaused()) {
                     int mx = scaleX(e.getX());
                     int my = scaleY(e.getY());
                     currentMenu.handleClick(
