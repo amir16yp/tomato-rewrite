@@ -10,6 +10,7 @@ public class PlayerTank extends Tank {
 
     public PlayerTank() {
         super(200, 200);
+        this.entityType = EntityType.PLAYER_TANK;
         this.speed = 100.0;
         // Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
         //     if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY)

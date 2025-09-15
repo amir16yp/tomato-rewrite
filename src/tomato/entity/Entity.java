@@ -1,5 +1,6 @@
 package tomato.entity;
 
+import tomato.core.SpriteCache;
 import tomato.core.World;
 
 import java.awt.*;
@@ -22,6 +23,7 @@ public class Entity
     protected int spriteWidth = 0;
     protected int spriteHeight = 0;
     protected int health = 20;
+    protected EntityType entityType;
 
     // TODO: enemy tanks should not exit their spawn chunks
     // TODO: projectiles should be marked for removal after it traveled through an entire chunk without hitting anything
@@ -62,19 +64,7 @@ public class Entity
 
 
     protected void createRotatedSprites(BufferedImage startingSprite) {
-        rotatedSprites = new BufferedImage[4];
-
-        // SOUTH (0 degrees) - original sprite
-        rotatedSprites[0] = startingSprite;
-
-        // EAST (90 degrees clockwise)
-        rotatedSprites[1] = rotateImage(startingSprite, Math.PI / 2);
-
-        // NORTH (180 degrees)
-        rotatedSprites[2] = rotateImage(startingSprite, Math.PI);
-
-        // WEST (270 degrees clockwise)s
-        rotatedSprites[3] = rotateImage(startingSprite, 3 * Math.PI / 2);
+        this.rotatedSprites= SpriteCache.getRotations(this.entityType, startingSprite);
     }
 
     public void update() {
@@ -182,30 +172,7 @@ public class Entity
     }
 
 
-    private BufferedImage rotateImage(BufferedImage image, double angle) {
-        int width = image.getWidth();
-        int height = image.getHeight();
 
-        // Create a new image with the same dimensions
-        BufferedImage rotated = new BufferedImage(width, height, image.getType());
-        Graphics2D g2d = rotated.createGraphics();
-
-        // Set rendering hints for better quality
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-        // Create transform for rotation around center
-        AffineTransform transform = new AffineTransform();
-        transform.translate(width / 2.0, height / 2.0);
-        transform.rotate(angle);
-        transform.translate(-width / 2.0, -height / 2.0);
-
-        g2d.setTransform(transform);
-        g2d.drawImage(image, 0, 0, null);
-        g2d.dispose();
-
-        return rotated;
-    }
 
     private void updateCurrentSprite() {
         BufferedImage oldSprite = this.currentSprite;

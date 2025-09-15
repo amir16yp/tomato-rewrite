@@ -16,6 +16,7 @@ public class EnemyTank extends Tank {
 
     public EnemyTank(double x, double y) {
         super(x, y);
+        this.entityType = EntityType.RED_ENEMY_TANK;
         this.speed = 120;
         this.currentSprite = tomato.core.Utils.loadQOI("/tomato/assets/tank_red.qoi");
     }

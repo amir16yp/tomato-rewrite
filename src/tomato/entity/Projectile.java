@@ -17,6 +17,7 @@ public class Projectile extends Entity{
     
     public Projectile(double x, double y, Entity shooter, Direction direction, int damage) {
         super(x, y);
+        this.entityType = EntityType.REGULAR_PROJECTILE;
         this.speed = 200;
         this.shooter = shooter;
         this.damage = damage;
