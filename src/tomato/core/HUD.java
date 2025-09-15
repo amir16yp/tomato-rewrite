@@ -72,7 +72,7 @@ public class HUD {
     private void renderPlayerHP(Graphics2D g, int x, int y) {
 
         int health = World.PLAYER_ENTITY.getHealth();
-        int maxHearts = (int) Math.ceil(20 / 2.0); // 20 hp = 10 hearts
+        int maxHearts = (int) Math.ceil(20 / 2.0); // 20 hp = 10 hearts (using standard Math.ceil for UI calculations)
 
         int fullHearts = health / 2;
         boolean hasHalf = (health % 2 == 1);

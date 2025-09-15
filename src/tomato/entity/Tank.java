@@ -1,5 +1,6 @@
 package tomato.entity;
 
+import tomato.core.Mathf;
 import tomato.core.Utils;
 
 public class Tank extends Entity {
@@ -41,9 +42,27 @@ public class Tank extends Entity {
     }
 
     protected void shoot() {
-        // Calculate center of the tank sprite
-        double centerX = x + (currentSprite != null ? currentSprite.getWidth() / 4.0 : 0);
-        double centerY = y + (currentSprite != null ? currentSprite.getHeight() / 4.0 : 0);
+        // Calculate center of the tank sprite using more precise positioning
+        double centerX = x + (currentSprite != null ? currentSprite.getWidth() / 2.0 : 0);
+        double centerY = y + (currentSprite != null ? currentSprite.getHeight() / 2.0 : 0);
+        
+        // Offset projectile spawn position based on direction for more realistic shooting
+        double offsetDistance = 20.0; // Distance from tank center to gun barrel
+        switch (currentDirection) {
+            case NORTH:
+                centerY -= offsetDistance;
+                break;
+            case SOUTH:
+                centerY += offsetDistance;
+                break;
+            case EAST:
+                centerX += offsetDistance;
+                break;
+            case WEST:
+                centerX -= offsetDistance;
+                break;
+        }
+        
         Projectile.shootProjectile(centerX, centerY, this, currentDirection);
     }
 

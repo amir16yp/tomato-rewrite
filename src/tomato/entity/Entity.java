@@ -1,5 +1,6 @@
 package tomato.entity;
 
+import tomato.core.Mathf;
 import tomato.core.SpriteCache;
 import tomato.core.World;
 
@@ -100,12 +101,11 @@ public class Entity {
     public boolean couldIntersectEntity(Entity otherEntity) {
         if (otherEntity == this) return false;
 
-        // Quick distance check first
-        double dx = this.x - otherEntity.x;
-        double dy = this.y - otherEntity.y;
+        // Quick distance check first using optimized Mathf distance
+        double distance = Mathf.distance(this.x, this.y, otherEntity.x, otherEntity.y);
         double maxDistance = 100; // Adjust based on your largest entity size
 
-        if (dx * dx + dy * dy > maxDistance * maxDistance) {
+        if (distance > maxDistance) {
             return false;
         }
 

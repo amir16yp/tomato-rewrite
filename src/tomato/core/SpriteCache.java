@@ -14,9 +14,9 @@ public class SpriteCache {
         return cache.computeIfAbsent(key, k -> {
             BufferedImage[] rotations = new BufferedImage[4];
             rotations[0] = base;
-            rotations[1] = rotateImage(base, Math.PI / 2);
-            rotations[2] = rotateImage(base, Math.PI);
-            rotations[3] = rotateImage(base, 3 * Math.PI / 2);
+            rotations[1] = rotateImage(base, Mathf.toRadians(90));
+            rotations[2] = rotateImage(base, Mathf.toRadians(180));
+            rotations[3] = rotateImage(base, Mathf.toRadians(270));
             return rotations;
         });
 

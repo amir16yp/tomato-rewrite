@@ -65,7 +65,7 @@ public class Camera {
      * Set the zoom level immediately
      */
     public void setZoom(float zoom) {
-        this.zoom = Math.max(0.1f, Math.min(10.0f, zoom)); // Clamp zoom
+        this.zoom = clamp(zoom, 0.1f, 10.0f); // Clamp zoom
         this.targetZoom = this.zoom;
     }
 
@@ -73,14 +73,14 @@ public class Camera {
      * Set the target zoom for smooth zooming
      */
     public void setTargetZoom(float zoom) {
-        this.targetZoom = Math.max(0.1f, Math.min(10.0f, zoom)); // Clamp zoom
+        this.targetZoom = clamp(zoom, 0.1f, 10.0f); // Clamp zoom
     }
 
     /**
      * Update camera interpolation (call this each frame)
      */
     public void update() {
-        // Smooth interpolation to target position
+        // Smooth interpolation to target position using exponential decay
         float lerpFactor = 1.0f - (float) Math.pow(1.0f - lerpSpeed, Game.GAME_LOOP.getDeltaTime() * 60.0f);
 
         x = lerp(x, targetX, lerpFactor);
@@ -185,7 +185,11 @@ public class Camera {
     }
 
     public void setLerpSpeed(float lerpSpeed) {
-        this.lerpSpeed = Math.max(0.01f, Math.min(1.0f, lerpSpeed));
+        this.lerpSpeed = clamp(lerpSpeed, 0.01f, 1.0f);
+    }
+
+    private float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     public float getLerpSpeed() {

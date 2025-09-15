@@ -1,6 +1,7 @@
 package tomato.entity;
 
 import tomato.Game;
+import tomato.core.Mathf;
 import tomato.core.World;
 
 import java.awt.*;
@@ -70,10 +71,19 @@ public class EnemyTank extends Tank {
         // 30% chance to track player
         if (rng.nextDouble() < 0.3) {
             Entity player = World.PLAYER_ENTITY;
-            if (Math.abs(player.getX() - this.x) > Math.abs(player.getY() - this.y)) {
-                this.currentDirection = (player.getX() > this.x) ? Direction.EAST : Direction.WEST;
+            double dx = player.getX() - this.x;
+            double dy = player.getY() - this.y;
+            // Use distance calculation to determine if player is close enough to track
+            double distanceToPlayer = Mathf.distance(this.x, this.y, player.getX(), player.getY());
+            if (distanceToPlayer < 200) { // Only track if player is within range
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.currentDirection = (dx > 0) ? Direction.EAST : Direction.WEST;
+                } else {
+                    this.currentDirection = (dy > 0) ? Direction.SOUTH : Direction.NORTH;
+                }
             } else {
-                this.currentDirection = (player.getY() > this.y) ? Direction.SOUTH : Direction.NORTH;
+                pickRandomDirection();
+                return;
             }
             updateSprite();
         } else {
@@ -93,9 +103,11 @@ public class EnemyTank extends Tank {
         Entity player = World.PLAYER_ENTITY;
 
         // Rough alignment check
-        if ((Math.abs(player.getX() - this.x) < 10 &&
+        double dx = player.getX() - this.x;
+        double dy = player.getY() - this.y;
+        if ((Math.abs(dx) < 10 &&
                 (currentDirection == Direction.NORTH || currentDirection == Direction.SOUTH)) ||
-                (Math.abs(player.getY() - this.y) < 10 &&
+                (Math.abs(dy) < 10 &&
                         (currentDirection == Direction.EAST || currentDirection == Direction.WEST))) {
 
             shoot();
