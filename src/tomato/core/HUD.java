@@ -50,7 +50,6 @@ public class HUD {
         World.Chunk chunk = World.PLAYER_ENTITY.getChunk();
         double px = World.PLAYER_ENTITY.getX();
         double py = World.PLAYER_ENTITY.getY();
-
         // first line
         String line1 = "FPS: " + Game.GAME_LOOP.getFPS() +
                 " | Δt: " + String.format("%.4f", Game.GAME_LOOP.getDeltaTime()) +

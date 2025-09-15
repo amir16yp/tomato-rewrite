@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 
 public class Button extends UIElement {
-    private Runnable onClick;
+    public Runnable onClick;
 
     public Button(String text, int width, int height, Runnable onClick) {
         super(width, height);

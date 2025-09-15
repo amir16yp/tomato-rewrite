@@ -6,5 +6,15 @@ public class GameState {
         PLAY
     }
 
-    public static GameStateType CURRENT_STATE = GameStateType.PLAY;
+    public static GameStateType CURRENT_STATE = GameStateType.PAUSED;
+
+    public static void Pause()
+    {
+        CURRENT_STATE = GameStateType.PAUSED;
+    }
+
+    public static void Play()
+    {
+        CURRENT_STATE = GameStateType.PLAY;
+    }
 }

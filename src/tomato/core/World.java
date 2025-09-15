@@ -28,7 +28,13 @@ public class World {
     // how far in chunks to load around the player
     private final int renderDistance = 1;
 
-    public static final World WORLD = new World(128, 4, 12345L, WorldType.GRASSLAND);
+    public static World WORLD;
+
+    public static void createWorld(WorldType type)
+    {
+        WORLD = new World(128, 4, 12345L, type);
+    }
+
     public static Entity PLAYER_ENTITY = new PlayerTank();
 
     private WorldType worldType;

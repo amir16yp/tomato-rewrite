@@ -6,6 +6,7 @@ public class Label extends UIElement {
     public Label(String text, int width, int height) {
         super(width, height);
         this.text = text;
+        this.textColor = Color.GREEN;
         this.backgroundColor = new Color(0, 0, 0, 0); // transparent
     }
 

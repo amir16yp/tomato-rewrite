@@ -15,8 +15,13 @@ public class Renderer extends JPanel {
     private VolatileImage backBuffer;
     private final HUD hud;
     private final Camera camera;
-    private static final MainMenu mainMenu = new MainMenu();
-    private final Menu currentMenu = mainMenu;
+    public static final MainMenu MAIN_MENU = new MainMenu();
+    private Menu currentMenu = MAIN_MENU;
+
+    public void setCurrentMenu(Menu menu)
+    {
+        currentMenu = menu;
+    }
 
     private int scaleX(int screenX) {
         return screenX * Game.WIDTH / getWidth();
