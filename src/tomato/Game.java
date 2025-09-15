@@ -13,8 +13,8 @@ import java.awt.event.KeyEvent;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Game extends JFrame {
 
-    public static final int WIDTH = 480;
-    public static final int HEIGHT = 272;
+    public static final int WIDTH = 640;
+    public static final int HEIGHT = 360;
     private final Rectangle windowBounds;
     public static final String GAME_TITLE = "Untitled Tank Game";
 

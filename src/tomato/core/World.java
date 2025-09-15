@@ -41,6 +41,7 @@ public class World {
     public static void createWorld(WorldType type)
     {
         WORLD = new World(128, 4, 12345L, type);
+        PLAYER_ENTITY = new PlayerTank();
     }
 
     public static Entity PLAYER_ENTITY = new PlayerTank();
@@ -56,6 +57,7 @@ public class World {
         this.random = new Random(seed);
         this.noise = new OpenSimplexNoise(random);
         this.vfxManager = new VFXManager();
+        this.vfxManager.getLighting().setDaylight((float) Math.random());
         // Initialize spatial grid with cell size of 64 pixels for efficient collision detection
         this.spatialGrid = new SpatialGrid(64);
     }
