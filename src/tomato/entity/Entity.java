@@ -27,6 +27,8 @@ public class Entity
     // TODO: projectiles should be marked for removal after it traveled through an entire chunk without hitting anything
     // TODO: use GameState to show different screens (death screen, pause)
     // TODO: add different enemy types and sprite variants (damage, etc)
+    // TODO: explosion VFX
+    // TODO: more mechanics (armor, ammo?)
 
     public void takeDamage(int damage) {
         this.health -= damage;
