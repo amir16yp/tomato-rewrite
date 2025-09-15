@@ -13,10 +13,10 @@ public class Game extends JFrame {
 
     public static final int WIDTH = 640;
     public static final int HEIGHT = 360;
-    private Rectangle windowBounds;
+    private final Rectangle windowBounds;
     public static final String GAME_TITLE = "Untitled Tank Game";
 
-    public static  Renderer RENDERER;
+    public static Renderer RENDERER;
     public static final KeyRegistry KEY_REGISTRY = new KeyRegistry();
     public static final GameLoop GAME_LOOP = new GameLoop();
     public static Game GAME;
@@ -32,8 +32,7 @@ public class Game extends JFrame {
 //        System.setProperty("sun.java2d.d3d", "True");
 //    }
 
-    public Game()
-    {
+    public Game() {
         GAME = this;
         RENDERER = new Renderer();
         setTitle(GAME_TITLE);
@@ -47,13 +46,12 @@ public class Game extends JFrame {
         setFocusable(true);
         requestFocus();
         setVisible(true);
-        
+
         // Start the game loop
         GAME_LOOP.start();
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         new Game();
     }
 

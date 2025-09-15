@@ -5,10 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Utils
-{
-    public static BufferedImage loadQOI(String pathFromJar)
-    {
+public class Utils {
+    public static BufferedImage loadQOI(String pathFromJar) {
         try {
             // Get the resource stream
             InputStream resourceStream = Utils.class.getResourceAsStream(pathFromJar);
@@ -19,8 +17,7 @@ public class Utils
             // Decode the image
             BufferedImage image = new QOIDecoder(toByteArray(resourceStream)).getImage();
             return image;
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             return null;
         }
     }

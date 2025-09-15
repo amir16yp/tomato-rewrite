@@ -4,21 +4,22 @@ import tomato.Game;
 import tomato.core.Utils;
 import tomato.core.World;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
-public class Projectile extends Entity{
+public class Projectile extends Entity {
 
-    private Direction shootDirection;
-    private Entity shooter;
-    private int damage;
+    private final Direction shootDirection;
+    private final Entity shooter;
+    private final int damage;
+
     public Projectile(double x, double y, Entity shooter, Direction direction) {
         this(x, y, shooter, direction, 10); // Default damage amount
     }
-    
+
     public Projectile(double x, double y, Entity shooter, Direction direction, int damage) {
         super(x, y);
         this.entityType = EntityType.REGULAR_PROJECTILE;
-        this.speed = 200;
+        this.speed = 500;
         this.shooter = shooter;
         this.damage = damage;
         this.shouldDrawHitbox = false;
@@ -26,18 +27,16 @@ public class Projectile extends Entity{
         shootDirection = direction;
     }
 
-    public static void shootProjectile(double x, double y, Entity shooter, Direction direction)
-    {
+    public static void shootProjectile(double x, double y, Entity shooter, Direction direction) {
         Projectile projectile = new Projectile(x, y, shooter, direction);
         World.WORLD.getWorldEntities().add(projectile);
     }
-    
-    public static void shootProjectile(double x, double y, Entity shooter, Direction direction, int damage)
-    {
+
+    public static void shootProjectile(double x, double y, Entity shooter, Direction direction, int damage) {
         Projectile projectile = new Projectile(x, y, shooter, direction, damage);
         World.WORLD.getWorldEntities().add(projectile);
     }
-    
+
     public int getDamage() {
         return damage;
     }
@@ -49,13 +48,25 @@ public class Projectile extends Entity{
         this.currentDirection = shootDirection;
         rotate(currentDirection);
         double adjustedSpeed = this.speed * Game.GAME_LOOP.getDeltaTime();
-        
+
         // Move projectile
         switch (currentDirection) {
-            case NORTH: setY(this.y - adjustedSpeed); break;
-            case SOUTH: setY(this.y + adjustedSpeed); break;
-            case EAST:  setX(this.x + adjustedSpeed); break;
-            case WEST:  setX(this.x - adjustedSpeed); break;
+            case NORTH:
+                setY(this.y - adjustedSpeed);
+                break;
+            case SOUTH:
+                setY(this.y + adjustedSpeed);
+                break;
+            case EAST:
+                setX(this.x + adjustedSpeed);
+                break;
+            case WEST:
+                setX(this.x - adjustedSpeed);
+                break;
+        }
+
+        if (isInUnloadedChunk()) {
+            markForRemoval();
         }
 
         // Check for collision and deal damage if hit
@@ -65,22 +76,23 @@ public class Projectile extends Entity{
             hitEntity.takeDamage(this.damage);
             this.markForRemoval();
             return;
-        }   
-        
+        }
+
         // Also check collision with player entity (stored separately)
-        if (World.PLAYER_ENTITY != null && World.PLAYER_ENTITY != shooter && 
-            this.getHitbox().intersects(World.PLAYER_ENTITY.getHitbox())) {
+        if (World.PLAYER_ENTITY != null && World.PLAYER_ENTITY != shooter &&
+                this.getHitbox().intersects(World.PLAYER_ENTITY.getHitbox())) {
             // Deal damage to the player
             World.PLAYER_ENTITY.takeDamage(this.damage);
             this.markForRemoval();
         }
-        
+
+
 //        // Remove projectile if it goes off screen (optional bounds check)
 //        if (isProjectileOutOfBounds()) {
 //            this.markForRemoval();
 //        }
     }
-    
+
 //    /**
 //     * Check if projectile is out of world bounds
 //     * Projectiles are allowed to go slightly beyond world boundaries before removal
@@ -95,34 +107,6 @@ public class Projectile extends Entity{
 //        return x < -BUFFER || x > WORLD_WIDTH + BUFFER ||
 //               y < -BUFFER || y > WORLD_HEIGHT + BUFFER;
 //    }
-    
-    /**
-     * Override getHitbox for smaller, more precise projectile collision
-     */
-    @Override
-    public Rectangle getHitbox() {
-        if (currentSprite == null) {
-            return new Rectangle((int)x, (int)y, 4, 4); // Small default hitbox
-        }
-        
-        // Use cached hitbox if available
-        if (cachedHitbox != null && !hitboxNeedsUpdate) {
-            cachedHitbox.x = (int)x;
-            cachedHitbox.y = (int)y;
-            return cachedHitbox;
-        }
-        
-        // Projectiles use smaller hitbox for better gameplay
-        int width = Math.max(4, currentSprite.getWidth() / 2);
-        int height = Math.max(4, currentSprite.getHeight() / 2);
-        
-        // Center the smaller hitbox
-        int offsetX = (currentSprite.getWidth() - width) / 2;
-        int offsetY = (currentSprite.getHeight() - height) / 2;
-        
-        cachedHitbox = new Rectangle((int)x + offsetX, (int)y + offsetY, width, height);
-        hitboxNeedsUpdate = false;
-        
-        return cachedHitbox;
-    }
+
+
 }

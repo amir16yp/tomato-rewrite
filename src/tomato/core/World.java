@@ -1,30 +1,35 @@
 package tomato.core;
 
-import tomato.core.OpenSimplexNoise;
+import tomato.entity.EnemyTank;
 import tomato.entity.Entity;
 import tomato.entity.PlayerTank;
-import tomato.entity.EnemyTank;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class World {
-    public static Entity PLAYER_ENTITY = new PlayerTank();
-    private CopyOnWriteArrayList<Entity> worldEntities = new CopyOnWriteArrayList<>();
-    public CopyOnWriteArrayList<Entity> getWorldEntities() { return worldEntities; }
 
-    private int cellSize;
-    private int chunkSizeCells;
-    private OpenSimplexNoise noise;
-    private long seed;
+    private final CopyOnWriteArrayList<Entity> worldEntities = new CopyOnWriteArrayList<>();
+
+    public CopyOnWriteArrayList<Entity> getWorldEntities() {
+        return worldEntities;
+    }
+
+    private final int cellSize;
+    private final int chunkSizeCells;
+    private final OpenSimplexNoise noise;
+    private final long seed;
 
     // Infinite chunk storage
-    private Map<Point, Chunk> chunks = new HashMap<>();
+    private final Map<Point, Chunk> chunks = new HashMap<>();
 
-    public static final World WORLD = new World(32, 4, 12345L);
+    // how far in chunks to load around the player
+    private final int renderDistance = 1;
+
+    public static final World WORLD = new World(256, 4, 12345L);
+    public static Entity PLAYER_ENTITY = new PlayerTank();
 
     public World(int chunkSizeCells, int cellSize, long seed) {
         this.chunkSizeCells = chunkSizeCells;
@@ -33,10 +38,22 @@ public class World {
         this.noise = new OpenSimplexNoise(seed);
     }
 
+    public Chunk getChunkAtWorld(double worldX, double worldY) {
+        int chunkSizePx = chunkSizeCells * cellSize;
+        int cx = (int) Math.floor(worldX / chunkSizePx);
+        int cy = (int) Math.floor(worldY / chunkSizePx);
+        return chunks.get(new Point(cx, cy));
+    }
+
     public void update() {
         PLAYER_ENTITY.update();
+
+        // only update entities in loaded chunks
         for (Entity entity : worldEntities) {
-            entity.update();
+            if (isEntityInLoadedChunk(entity)) {
+                entity.update();
+            }
+
             if (entity.isMarkedForRemoval()) {
                 worldEntities.remove(entity);
             }
@@ -44,31 +61,79 @@ public class World {
     }
 
     public void render(Graphics2D g, Rectangle cameraView) {
-        // Figure out which chunks overlap the camera
-        int startCX = (int)Math.floor(cameraView.x / (double)(chunkSizeCells * cellSize));
-        int startCY = (int)Math.floor(cameraView.y / (double)(chunkSizeCells * cellSize));
-        int endCX   = (int)Math.floor((cameraView.x + cameraView.width) / (double)(chunkSizeCells * cellSize));
-        int endCY   = (int)Math.floor((cameraView.y + cameraView.height) / (double)(chunkSizeCells * cellSize));
+        // figure out which chunk the player is standing in
+        int playerChunkX = (int) Math.floor(PLAYER_ENTITY.getX() / (double) getChunkSizePx());
+        int playerChunkY = (int) Math.floor(PLAYER_ENTITY.getY() / (double) getChunkSizePx());
 
-        for (int cx = startCX; cx <= endCX; cx++) {
-            for (int cy = startCY; cy <= endCY; cy++) {
-                final int fcx = cx;
-                final int fcy = cy;
-                Point key = new Point(fcx, fcy);
-                Chunk chunk = chunks.computeIfAbsent(key, k -> new Chunk(fcx, fcy));
+        Set<Point> visible = new HashSet<>();
+
+        // load a square grid around player
+        for (int dx = -renderDistance; dx <= renderDistance; dx++) {
+            for (int dy = -renderDistance; dy <= renderDistance; dy++) {
+                int cx = playerChunkX + dx;
+                int cy = playerChunkY + dy;
+                Point key = new Point(cx, cy);
+
+                // bake or reuse
+                Chunk chunk = chunks.computeIfAbsent(key, k -> new Chunk(cx, cy));
+
+                // render it
                 g.drawImage(chunk.image, chunk.worldX, chunk.worldY, null);
+                visible.add(key);
             }
         }
 
-        PLAYER_ENTITY.render(g);
-        worldEntities.forEach(entity -> entity.render(g));
+        // 🔥 Unload everything else
+        chunks.keySet().removeIf(key -> !visible.contains(key));
+
+        // draw entities only if inside a loaded chunk
+        if (isEntityInLoadedChunk(PLAYER_ENTITY)) {
+            PLAYER_ENTITY.render(g);
+        }
+
+        worldEntities.forEach(entity -> {
+            if (isEntityInLoadedChunk(entity)) {
+                entity.render(g);
+            }
+        });
+    }
+
+    public int getLoadedChunkCount() {
+        return chunks.size();
+    }
+
+    public Collection<Chunk> getChunks() {
+        return chunks.values();
+    }
+
+    public boolean isChunkLoaded(int cx, int cy) {
+        return chunks.containsKey(new Point(cx, cy));
+    }
+
+    public boolean isEntityInLoadedChunk(Entity e) {
+        int chunkSizePx = chunkSizeCells * cellSize;
+        int cx = (int) Math.floor(e.getX() / (double) chunkSizePx);
+        int cy = (int) Math.floor(e.getY() / (double) chunkSizePx);
+        return isChunkLoaded(cx, cy);
     }
 
     public void spawnRedEnemy(double x, double y) {
         worldEntities.add(new EnemyTank(x, y));
     }
 
-    private class Chunk {
+    public int getCellSize() {
+        return cellSize;
+    }
+
+    public int getChunkSizeCells() {
+        return chunkSizeCells;
+    }
+
+    public int getChunkSizePx() {
+        return chunkSizeCells * cellSize;
+    }
+
+    public class Chunk {
         int cx, cy;
         int worldX, worldY;
         BufferedImage image;
@@ -79,6 +144,12 @@ public class World {
             this.worldX = cx * chunkSizeCells * cellSize;
             this.worldY = cy * chunkSizeCells * cellSize;
             bake();
+        }
+
+        public Rectangle getBounds() {
+            int w = chunkSizeCells * cellSize;
+            int h = chunkSizeCells * cellSize;
+            return new Rectangle(worldX, worldY, w, h);
         }
 
         private void bake() {
@@ -101,9 +172,9 @@ public class World {
                     if (value < -0.2) {
                         color = new Color(90, 60, 40); // dirt
                     } else if (value < 0.3) {
-                        color = new Color(30, 120 + (int)(100 * value), 30); // grass
+                        color = new Color(30, 120 + (int) (100 * value), 30); // grass
                     } else {
-                        int c = 140 + (int)(60 * value); // stone
+                        int c = 140 + (int) (60 * value); // stone
                         color = new Color(c, c, c);
                     }
 

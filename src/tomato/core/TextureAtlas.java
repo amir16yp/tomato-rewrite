@@ -75,8 +75,7 @@ public class TextureAtlas {
     }
 
     private BufferedImage createPlaceholderTile() {
-        if (placeholderImage != null)
-        {
+        if (placeholderImage != null) {
             return placeholderImage;
         }
         BufferedImage placeholder = new BufferedImage(tileWidth, tileHeight, BufferedImage.TYPE_INT_ARGB);

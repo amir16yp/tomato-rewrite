@@ -11,14 +11,14 @@ public class OpenSimplexNoise {
     private static final double SQUISH_CONSTANT_2D = 0.366025403784439;      // (√2+1 - 1)/2
 
     private static final long DEFAULT_SEED = 0;
-    private short[] perm;
-    private short[] permGradIndex2D;
+    private final short[] perm;
+    private final short[] permGradIndex2D;
 
     private static final byte[] gradients2D = new byte[]{
-            5,  2,   2,  5,
-            -5,  2,  -2,  5,
-            5, -2,   2, -5,
-            -5, -2,  -2, -5,
+            5, 2, 2, 5,
+            -5, 2, -2, 5,
+            5, -2, 2, -5,
+            -5, -2, -2, -5,
     };
 
     public OpenSimplexNoise() {
@@ -35,12 +35,14 @@ public class OpenSimplexNoise {
         for (int i = 255; i >= 0; i--) {
             int r = random.nextInt(i + 1);
             perm[i] = source[r];
-            permGradIndex2D[i] = (short)((perm[i] % (gradients2D.length / 2)) * 2);
+            permGradIndex2D[i] = (short) ((perm[i] % (gradients2D.length / 2)) * 2);
             source[r] = source[i];
         }
     }
 
-    /** 2D OpenSimplex noise: returns in range [-1, 1] */
+    /**
+     * 2D OpenSimplex noise: returns in range [-1, 1]
+     */
     public double eval(double x, double y) {
         // Place input coordinates onto grid.
         double stretchOffset = (x + y) * STRETCH_CONSTANT_2D;

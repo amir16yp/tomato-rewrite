@@ -1,7 +1,7 @@
 package tomato.core;
+
 import tomato.Game;
 
-import javax.swing.SwingUtilities;
 import java.util.concurrent.locks.LockSupport;
 
 
@@ -33,7 +33,7 @@ public class GameLoop implements Runnable {
     }
 
     public int getTargetFPS() {
-        return 60;
+        return 0;
     }
 
     public float getTimeScale() {
@@ -72,6 +72,7 @@ public class GameLoop implements Runnable {
 
     /**
      * Check if the game loop is currently running
+     *
      * @return True if the game loop is running
      */
     public boolean isRunning() {
@@ -113,11 +114,10 @@ public class GameLoop implements Runnable {
     }
 
 
-
     @Override
     public void run() {
         final long targetFrameTime = (long) (NANOS_PER_SECOND / getTargetFPS());
-        
+
         while (running) {
             long frameStartTime = System.nanoTime();
 
@@ -127,16 +127,16 @@ public class GameLoop implements Runnable {
 
             // Update game state
             Game.RENDERER.update();
-            
+
             // Repaint on EDT
             Game.RENDERER.repaint();
-            
+
             updateFPS(frameStartTime);
-            
+
             // Frame rate limiting
             long frameTime = System.nanoTime() - frameStartTime;
             long sleepTime = targetFrameTime - frameTime;
-            
+
             if (sleepTime > 0) {
                 preciseSleep(sleepTime);
             }

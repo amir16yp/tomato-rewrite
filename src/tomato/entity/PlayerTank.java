@@ -1,7 +1,6 @@
 package tomato.entity;
 
 import tomato.Game;
-import tomato.core.GameState;
 import tomato.core.World;
 
 import java.awt.event.KeyEvent;
@@ -18,8 +17,12 @@ public class PlayerTank extends Tank {
         //         GameState.CURRENT_STATE = GameState.GameStateType.PAUSED;
         //     }
         // });
-        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {turnLeft();});
-        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> {turnRight();});
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {
+            turnLeft();
+        });
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> {
+            turnRight();
+        });
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_SPACE, () -> {
             shoot();
         });
@@ -51,19 +54,35 @@ public class PlayerTank extends Tank {
 
     private void turnLeft() {
         switch (currentDirection) {
-            case NORTH: rotate(Direction.WEST); break;
-            case WEST:  rotate(Direction.SOUTH); break;
-            case SOUTH: rotate(Direction.EAST); break;
-            case EAST:  rotate(Direction.NORTH); break;
+            case NORTH:
+                rotate(Direction.WEST);
+                break;
+            case WEST:
+                rotate(Direction.SOUTH);
+                break;
+            case SOUTH:
+                rotate(Direction.EAST);
+                break;
+            case EAST:
+                rotate(Direction.NORTH);
+                break;
         }
     }
 
     private void turnRight() {
         switch (currentDirection) {
-            case NORTH: rotate(Direction.EAST); break;
-            case EAST:  rotate(Direction.SOUTH); break;
-            case SOUTH: rotate(Direction.WEST); break;
-            case WEST:  rotate(Direction.NORTH); break;
+            case NORTH:
+                rotate(Direction.EAST);
+                break;
+            case EAST:
+                rotate(Direction.SOUTH);
+                break;
+            case SOUTH:
+                rotate(Direction.WEST);
+                break;
+            case WEST:
+                rotate(Direction.NORTH);
+                break;
         }
     }
 }

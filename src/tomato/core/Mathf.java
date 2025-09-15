@@ -51,6 +51,7 @@ public class Mathf {
 
     /**
      * Fast sine calculation using table lookup
+     *
      * @param angle Angle in radians
      * @return Approximate sine value
      */
@@ -60,12 +61,13 @@ public class Mathf {
         if (angle < 0) angle += MAX_ANGLE;
 
         // Convert to table index
-        int index = (int)(angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
+        int index = (int) (angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
         return SIN_TABLE[index];
     }
 
     /**
      * Fast cosine calculation using table lookup
+     *
      * @param angle Angle in radians
      * @return Approximate cosine value
      */
@@ -75,12 +77,13 @@ public class Mathf {
         if (angle < 0) angle += MAX_ANGLE;
 
         // Convert to table index
-        int index = (int)(angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
+        int index = (int) (angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
         return COS_TABLE[index];
     }
 
     /**
      * Fast tangent calculation using table lookup
+     *
      * @param angle Angle in radians
      * @return Approximate tangent value
      */
@@ -90,12 +93,13 @@ public class Mathf {
         if (angle < 0) angle += MAX_ANGLE;
 
         // Convert to table index
-        int index = (int)(angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
+        int index = (int) (angle * TABLE_FACTOR) & (TABLE_SIZE - 1);
         return TAN_TABLE[index];
     }
 
     /**
      * Fast inverse tangent approximation
+     *
      * @param y Y coordinate
      * @param x X coordinate
      * @return Approximate arctangent in radians
@@ -120,6 +124,7 @@ public class Mathf {
 
     /**
      * Converts degrees to radians
+     *
      * @param degrees Angle in degrees
      * @return Angle in radians
      */
@@ -131,6 +136,7 @@ public class Mathf {
 
     /**
      * Converts radians to degrees
+     *
      * @param radians Angle in radians
      * @return Angle in degrees
      */
@@ -142,6 +148,7 @@ public class Mathf {
 
     /**
      * Fast approximation of square root for distance calculations
+     *
      * @param x Value to calculate square root of
      * @return Approximated square root
      */
@@ -162,6 +169,7 @@ public class Mathf {
 
     /**
      * Calculate the distance between two points using fast approximation
+     *
      * @param x1 First point x
      * @param y1 First point y
      * @param x2 Second point x

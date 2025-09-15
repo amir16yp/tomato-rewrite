@@ -4,12 +4,10 @@ import tomato.core.SpriteCache;
 import tomato.core.World;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Entity
-{
+public class Entity {
     protected double x;
     protected double y;
     protected BufferedImage currentSprite;
@@ -38,17 +36,24 @@ public class Entity
             markForRemoval();
         }
     }
-    
+
+    public World.Chunk getChunk() {
+        return World.WORLD.getChunkAtWorld(x, y);
+    }
+
+    public Rectangle getSpawnCage() {
+        return getChunk().getBounds();
+    }
+
     public int getHealth() {
         return health;
     }
-    
+
     public void setHealth(int health) {
         this.health = health;
     }
 
-    public void markForRemoval()
-    {
+    public void markForRemoval() {
         this.markedForRemoval = true;
     }
 
@@ -60,73 +65,51 @@ public class Entity
         this.x = x;
         this.y = y;
         this.currentDirection = Direction.SOUTH;
+
     }
 
 
     protected void createRotatedSprites(BufferedImage startingSprite) {
-        this.rotatedSprites= SpriteCache.getRotations(this.entityType, startingSprite);
+        this.rotatedSprites = SpriteCache.getRotations(this.entityType, startingSprite);
     }
 
     public void update() {
-        if (rotatedSprites == null)
-        {
+        if (rotatedSprites == null) {
             createRotatedSprites(this.currentSprite);
             updateCurrentSprite();
         }
     }
 
-    public boolean intersectsEntity(Entity otherEntity)
-    {
+    public boolean isInUnloadedChunk() {
+        return !World.WORLD.isEntityInLoadedChunk(this);
+    }
+
+    public boolean intersectsEntity(Entity otherEntity) {
         if (otherEntity == this) return false;
         return otherEntity.getHitbox().intersects(this.getHitbox());
     }
-    
+
     /**
      * Fast distance-based collision check before expensive hitbox intersection
      */
-    public boolean couldIntersectEntity(Entity otherEntity)
-    {
+    public boolean couldIntersectEntity(Entity otherEntity) {
         if (otherEntity == this) return false;
-        
+
         // Quick distance check first
         double dx = this.x - otherEntity.x;
         double dy = this.y - otherEntity.y;
         double maxDistance = 100; // Adjust based on your largest entity size
-        
+
         if (dx * dx + dy * dy > maxDistance * maxDistance) {
             return false;
         }
-        
+
         return intersectsEntity(otherEntity);
     }
-//
-//    public Rectangle getHitbox() {
-//        if (currentSprite == null) {
-//            return new Rectangle((int)x, (int)y, 0, 0);
-//        }
-//
-//        // Use cached hitbox if position hasn't changed and hitbox is valid
-//        if (cachedHitbox != null && !hitboxNeedsUpdate) {
-//            cachedHitbox.x = (int)x;
-//            cachedHitbox.y = (int)y;
-//            return cachedHitbox;
-//        }
-//
-//        // For performance, use simple bounding box for most entities
-//        // Override this method in specific entities that need pixel-perfect collision
-//        int width = currentSprite.getWidth();
-//        int height = currentSprite.getHeight();
-//
-//        cachedHitbox = new Rectangle((int)x, (int)y, width, height);
-//        hitboxNeedsUpdate = false;
-//
-//        return cachedHitbox;
-//    }
-    
-    // Pixel-perfect hitbox calculation - only use when necessary
-    protected Rectangle getHitbox() {
+
+    public Rectangle getHitbox() {
         if (currentSprite == null) {
-            return new Rectangle((int)x, (int)y, 0, 0);
+            return new Rectangle((int) x, (int) y, 0, 0);
         }
 
         int width = currentSprite.getWidth();
@@ -151,32 +134,29 @@ public class Entity
         }
 
         if (maxX < minX || maxY < minY) {
-            return new Rectangle((int)x, (int)y, 0, 0);
+            return new Rectangle((int) x, (int) y, 0, 0);
         }
 
         int rectWidth = (maxX - minX) + 1;
         int rectHeight = (maxY - minY) + 1;
 
         return new Rectangle(
-                (int)x + minX,
-                (int)y + minY,
+                (int) x + minX,
+                (int) y + minY,
                 rectWidth,
                 rectHeight
         );
     }
 
-    private Point getCenteroid()
-    {
+    private Point getCenteroid() {
         Rectangle hitbox = getHitbox();
         return new Point((int) hitbox.getCenterX(), (int) hitbox.getCenterY());
     }
 
 
-
-
     private void updateCurrentSprite() {
         BufferedImage oldSprite = this.currentSprite;
-        
+
         switch (currentDirection) {
             case SOUTH:
                 this.currentSprite = rotatedSprites[0];
@@ -191,21 +171,19 @@ public class Entity
                 this.currentSprite = rotatedSprites[3];
                 break;
         }
-        
+
         // Mark hitbox for update if sprite changed
         if (oldSprite != this.currentSprite) {
             hitboxNeedsUpdate = true;
         }
     }
 
-    public void rotate(Direction direction)
-    {
+    public void rotate(Direction direction) {
         this.currentDirection = direction;
         updateCurrentSprite();
     }
 
-    private void drawHitbox(Graphics g)
-    {
+    private void drawHitbox(Graphics g) {
         Color originColor = g.getColor();
         g.setColor(Color.RED);
         Rectangle hitbox = getHitbox();
@@ -215,81 +193,67 @@ public class Entity
 
     public void render(Graphics2D g) {
         if (currentSprite != null) {
-            g.drawImage(currentSprite, (int)x, (int)y, null);
-            if (shouldDrawHitbox)
-            {
+            g.drawImage(currentSprite, (int) x, (int) y, null);
+            if (shouldDrawHitbox) {
                 drawHitbox(g);
             }
         } else {
             // Draw a simple colored rectangle as placeholder
             g.setColor(Color.RED);
-            g.fillRect((int)x, (int)y, 10, 10);
+            g.fillRect((int) x, (int) y, 10, 10);
         }
     }
 
     /**
      * Get entities that intersect with this entity - optimized for projectiles
      */
-    public ArrayList<Entity> getEntitiesIntersect()
-    {
+    public ArrayList<Entity> getEntitiesIntersect() {
         ArrayList<Entity> entitiesIntersected = new ArrayList<>();
         Rectangle hitbox = this.getHitbox();
-        
-        for (Entity entity : World.WORLD.getWorldEntities())
-        {
-            if (entity != this && entity.getHitbox().intersects(hitbox))
-            {
+
+        for (Entity entity : World.WORLD.getWorldEntities()) {
+            if (entity != this && entity.getHitbox().intersects(hitbox)) {
                 entitiesIntersected.add(entity);
             }
         }
         return entitiesIntersected;
     }
-    
+
     /**
      * Fast collision check - returns first entity hit (optimized for projectiles)
      */
-    public Entity getFirstEntityHit()
-    {
+    public Entity getFirstEntityHit() {
         Rectangle hitbox = this.getHitbox();
-        
-        for (Entity entity : World.WORLD.getWorldEntities())
-        {
-            if (entity != this && entity.getHitbox().intersects(hitbox))
-            {
+
+        for (Entity entity : World.WORLD.getWorldEntities()) {
+            if (entity != this && entity.getHitbox().intersects(hitbox)) {
                 return entity;
             }
         }
         return null;
     }
 
-    
+
     /**
      * Check if this entity intersects with any non-projectile entity
      * Used for collision prevention in movement
      */
-    public boolean hasCollisionWithNonProjectiles()
-    {
+    public boolean hasCollisionWithNonProjectiles() {
         Rectangle hitbox = this.getHitbox();
-        for (Entity entity : World.WORLD.getWorldEntities())
-        {
-            if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox))
-            {
+        for (Entity entity : World.WORLD.getWorldEntities()) {
+            if (entity != this && !(entity instanceof Projectile) && entity.getHitbox().intersects(hitbox)) {
                 return true;
             }
         }
-        
+
         // Also check collision with player entity if this is not the player
-        if (this != World.PLAYER_ENTITY && !(World.PLAYER_ENTITY instanceof Projectile))
-        {
-            if (World.PLAYER_ENTITY.getHitbox().intersects(hitbox))
-            {
-                return true;
-            }
+        if (this != World.PLAYER_ENTITY && !(World.PLAYER_ENTITY instanceof Projectile)) {
+            return World.PLAYER_ENTITY.getHitbox().intersects(hitbox);
         }
-        
+
         return false;
     }
-    
+
 //    /**
 //     * Check if this entity would be out of world bounds at the given position
 //     * Projectiles are exempt from bounds checking
@@ -316,18 +280,24 @@ public class Entity
 //
 
 
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public void setX(double x) { 
-        this.x = x; 
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
         hitboxNeedsUpdate = true;
     }
-    
-    public void setY(double y) { 
-        this.y = y; 
+
+    public void setY(double y) {
+        this.y = y;
         hitboxNeedsUpdate = true;
     }
-    
+
     public void setPosition(double x, double y) {
         this.x = x;
         this.y = y;
@@ -362,6 +332,6 @@ public class Entity
 //        sb.append("Marked for removal: ").append(markedForRemoval).append("\n");
         sb.append("===================\n");
 
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 }

@@ -1,8 +1,9 @@
 package tomato.entity;
 
-import tomato.core.World;
 import tomato.Game;
+import tomato.core.World;
 
+import java.awt.*;
 import java.util.Random;
 
 public class EnemyTank extends Tank {
@@ -12,7 +13,7 @@ public class EnemyTank extends Tank {
 
     private double thinkTimerMs = 0;
     private double fireCooldownMs = 0;
-    private Random rng = new Random();
+    private final Random rng = new Random();
 
     public EnemyTank(double x, double y) {
         super(x, y);
@@ -24,7 +25,9 @@ public class EnemyTank extends Tank {
     @Override
     public void update() {
         super.update();
-
+        if (isInUnloadedChunk()) {
+            return;
+        }
         // use deltaTimeMillis from the GameLoop
         float dtMs = Game.GAME_LOOP.getDeltaTimeMillis();
 
@@ -39,12 +42,28 @@ public class EnemyTank extends Tank {
         // Try moving in current direction
         double step = this.speed * Game.GAME_LOOP.getDeltaTime();
         moveForward(step);
+        Rectangle spawnCage = getSpawnCage();
+        if (spawnCage != null)
+        {
+            if (!this.getSpawnCage().contains(getHitbox())) {
+                // Undo move
+                moveForward(-step);
+                // Pick a new direction instead
+                pickRandomDirection();
+            }
+        }
+
 
         // The collision detection is now handled inside moveForward() method
         // No need for additional collision checking here since moveForward()
         // will automatically prevent movement into colliding positions
 
         tryShoot();
+    }
+
+    @Override
+    protected void moveForward(double distance) {
+        super.moveForward(distance);
     }
 
     private void makeDecision() {

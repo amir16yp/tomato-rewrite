@@ -10,8 +10,8 @@ import java.awt.image.VolatileImage;
 public class Renderer extends JPanel {
 
     private VolatileImage backBuffer;
-    private HUD hud;
-    private Camera camera;
+    private final HUD hud;
+    private final Camera camera;
 
     public Renderer() {
         setDoubleBuffered(false);

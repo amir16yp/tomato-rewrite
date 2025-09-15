@@ -1,7 +1,6 @@
 package tomato.core;
 
-public class GameState
-{
+public class GameState {
     public enum GameStateType {
         PAUSED,
         PLAY
