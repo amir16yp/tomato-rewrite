@@ -42,6 +42,11 @@ public class Entity {
     }
 
     public Rectangle getSpawnCage() {
+        World.Chunk chunk = getChunk();
+        if (chunk == null)
+        {
+            return null;
+        }
         return getChunk().getBounds();
     }
 

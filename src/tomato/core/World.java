@@ -28,10 +28,14 @@ public class World {
     // how far in chunks to load around the player
     private final int renderDistance = 1;
 
-    public static final World WORLD = new World(256, 4, 12345L);
+    public static final World WORLD = new World(128, 4, 12345L, WorldType.GRASSLAND);
     public static Entity PLAYER_ENTITY = new PlayerTank();
 
-    public World(int chunkSizeCells, int cellSize, long seed) {
+    private WorldType worldType;
+
+    public World(int chunkSizeCells, int cellSize, long seed,WorldType worldType)
+    {
+        this.worldType = worldType;
         this.chunkSizeCells = chunkSizeCells;
         this.cellSize = cellSize;
         this.seed = seed;
@@ -143,7 +147,17 @@ public class World {
             this.cy = cy;
             this.worldX = cx * chunkSizeCells * cellSize;
             this.worldY = cy * chunkSizeCells * cellSize;
-            bake();
+            switch (worldType) {
+                case DESERT:
+                    bakeDesert();
+                    break;
+                case GRASSLAND:
+                    bakeGrassland();
+                    break;
+                default:
+                    bakeGrassland();
+                    break;
+            }
         }
 
         public Rectangle getBounds() {
@@ -152,7 +166,53 @@ public class World {
             return new Rectangle(worldX, worldY, w, h);
         }
 
-        private void bake() {
+        private void bakeDesert() {
+            int w = chunkSizeCells * cellSize;
+            int h = chunkSizeCells * cellSize;
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+
+            for (int lx = 0; lx < chunkSizeCells; lx++) {
+                for (int ly = 0; ly < chunkSizeCells; ly++) {
+                    int gx = cx * chunkSizeCells + lx;
+                    int gy = cy * chunkSizeCells + ly;
+
+                    // normalize gx, gy
+                    double nx = gx / 100.0;
+                    double ny = gy / 100.0;
+                    double value = fractalNoise(nx, ny, 4, 0.5);
+
+                    Color color;
+                    if (value < -0.3) {
+                        // dark rock patch (rare, scattered)
+                        int c = 100 + (int)(40 * (value + 0.3));
+                        color = new Color(c, c, c);
+                    } else if (value < 0.4) {
+                        // main sand tone
+                        int base = 200 + (int)(20 * value);
+                        color = new Color(base, base, 150);
+                    } else {
+                        // dry cracked earth / dune highlights
+                        int r = 220 + (int)(30 * value);
+                        int gcol = 200 + (int)(20 * value);
+                        int b = 120 + (int)(10 * value);
+                        color = new Color(r, gcol, b);
+                    }
+
+                    // occasional green speckles for sparse vegetation
+                    if (Math.random() < 0.001 && value > -0.1 && value < 0.3) {
+                        color = new Color(50, 120, 50);
+                    }
+
+                    g.setColor(color);
+                    g.fillRect(lx * cellSize, ly * cellSize, cellSize, cellSize);
+                }
+            }
+            g.dispose();
+        }
+
+
+        private void bakeGrassland() {
             int w = chunkSizeCells * cellSize;
             int h = chunkSizeCells * cellSize;
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
