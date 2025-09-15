@@ -1,6 +1,7 @@
 package tomato.entity;
 
 import tomato.Game;
+import tomato.core.GameState;
 import tomato.core.World;
 
 import java.awt.event.KeyEvent;
@@ -10,6 +11,12 @@ public class PlayerTank extends Tank {
     public PlayerTank() {
         super(160, 160);
         this.speed = 100.0;
+        Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_ESCAPE, () -> {
+            if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY)
+            {
+                GameState.CURRENT_STATE = GameState.GameStateType.PAUSED;
+            }
+        });
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_A, () -> {turnRight();});
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_D, () -> turnLeft());
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_SPACE, () -> {
@@ -18,7 +25,6 @@ public class PlayerTank extends Tank {
             double centerY = y + (currentSprite != null ? currentSprite.getHeight() / 4.0 : 0);
             Projectile.shootProjectile(centerX, centerY, this, currentDirection);
         });
-
 
         Game.KEY_REGISTRY.onKeyPressed(KeyEvent.VK_X, () -> {
             // debug key

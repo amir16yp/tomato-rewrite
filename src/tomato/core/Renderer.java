@@ -1,7 +1,8 @@
 package tomato.core;
 
 import tomato.Game;
-
+import tomato.ui.MainMenu;
+import tomato.ui.Menu;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -11,6 +12,23 @@ public class Renderer extends JPanel {
 
     private BufferedImage screenBuffer;
     private Camera camera;
+
+    private static Menu currentMenu;
+    private static MainMenu mainMenu = new MainMenu();
+    private static void setCurrentMenu(Menu newMenu)
+    {
+        if (currentMenu != null)
+        {
+            Game.GAME.removeMouseListener(currentMenu);
+            Game.GAME.removeMouseMotionListener(currentMenu);
+            Game.GAME.removeMouseWheelListener(currentMenu);
+        }
+        Game.GAME.addMouseListener(newMenu);
+        Game.GAME.addMouseMotionListener(newMenu);
+        Game.GAME.addMouseWheelListener(newMenu);
+        currentMenu = newMenu;
+    }
+
 
     public Renderer() {
         // Try enabling hardware acceleration
@@ -26,6 +44,7 @@ public class Renderer extends JPanel {
         setDoubleBuffered(false); // We're doing our own buffering
         setFocusable(true);
         requestFocus();
+        setCurrentMenu(mainMenu);
     }
 
     private void createScreenBuffer() {
@@ -69,8 +88,6 @@ public class Renderer extends JPanel {
      * Main update method – your game loop calls this.
      */
     public void update() {
-        // In a real game you’d draw the world/entities here.
-        // For now just clear to black each frame.
         validateBuffer();
 
         if (screenBuffer != null) {
@@ -81,25 +98,30 @@ public class Renderer extends JPanel {
                 g.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_DISABLE);
                 g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_SPEED);
 
-                // Clear screen first
+                // Clear screen
                 g.setColor(Color.BLACK);
                 g.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
 
-                // Update camera
-                camera.update(1.0f / 60.0f); // Assuming 60 FPS
+                if (GameState.CURRENT_STATE == GameState.GameStateType.PLAY) {
+                    // --- WORLD RENDERING ---
+                    camera.update(Game.GAME_LOOP.getDeltaTime());
 
-                // Save original transform
-                AffineTransform originalTransform = g.getTransform();
-                
-                // Apply camera transform
-                camera.applyTransform(g, Game.WIDTH, Game.HEIGHT);
+                    AffineTransform originalTransform = g.getTransform();
+                    camera.applyTransform(g, Game.WIDTH, Game.HEIGHT);
 
-                // Render the world with camera transform
-                World.WORLD.update();
-                World.WORLD.render(g);
+                    World.WORLD.update();
+                    World.WORLD.render(g);
 
-                // Reset transform for UI elements
-                camera.resetTransform(g, originalTransform);
+                    camera.resetTransform(g, originalTransform);
+
+                } else if (GameState.CURRENT_STATE == GameState.GameStateType.PAUSED) {
+                    // --- MENU RENDERING ---
+                    if (currentMenu != null) {
+                        currentMenu.setVisible(true);
+                        currentMenu.update();
+                        currentMenu.draw(g);
+                    }
+                }
 
             } finally {
                 g.dispose();
@@ -110,7 +132,7 @@ public class Renderer extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         // Don't call super.paintComponent to avoid clearing
-        
+
         validateBuffer();
         if (screenBuffer == null) {
             g.setColor(Color.BLACK);
@@ -119,7 +141,7 @@ public class Renderer extends JPanel {
         }
 
         Graphics2D g2d = (Graphics2D) g;
-        
+
         // Save hint
         Object oldHint = g2d.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);

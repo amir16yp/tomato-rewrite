@@ -16,7 +16,7 @@ public class Game extends JFrame {
     private Rectangle windowBounds;
     public static final String GAME_TITLE = "Untitled Tank Game";
 
-    public static final Renderer RENDERER = new Renderer();
+    public static  Renderer RENDERER;
     public static final KeyRegistry KEY_REGISTRY = new KeyRegistry();
     public static final GameLoop GAME_LOOP = new GameLoop();
     public static Game GAME;
@@ -35,6 +35,7 @@ public class Game extends JFrame {
     public Game()
     {
         GAME = this;
+        RENDERER = new Renderer();
         setTitle(GAME_TITLE);
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
